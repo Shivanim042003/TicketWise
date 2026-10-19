@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
@@ -29,7 +30,9 @@ def test_keyword_search():
         )
 
     assert response.status_code == 200
+
     data = response.json()
+
     assert data["method"] == "keyword"
     assert len(data["results"]) <= 3
     assert data["results"][0]["id"] == "TICK-001"
@@ -46,7 +49,9 @@ def test_semantic_search():
         )
 
     assert response.status_code == 200
+
     data = response.json()
+
     assert data["method"] == "embedding"
     assert len(data["results"]) <= 5
     assert data["results"][0]["id"] == "TICK-001"
@@ -70,26 +75,29 @@ def test_search_rejects_empty_query():
 
 
 def test_semantic_search_rejects_invalid_backend():
-    try:
+    with pytest.raises(
+        ValueError,
+        match="Unsupported model backend",
+    ):
         SemanticSearch(backend="onnxx")
-    except ValueError as exc:
-        assert "Unsupported model backend" in str(exc)
-    else:
-        raise AssertionError(
-            "Expected ValueError for unsupported backend"
-        )
+
 
 def test_concurrent_semantic_search_respects_each_top_k():
     from concurrent.futures import ThreadPoolExecutor
 
-    from fastapi.testclient import TestClient
-
-    from backend.app.main import app
-
     requests = [
-        {"query": "API returns 503 after deployment", "top_k": 1},
-        {"query": "database connection timeout", "top_k": 3},
-        {"query": "login fails after password reset", "top_k": 2},
+        {
+            "query": "API returns 503 after deployment",
+            "top_k": 1,
+        },
+        {
+            "query": "database connection timeout",
+            "top_k": 3,
+        },
+        {
+            "query": "login fails after password reset",
+            "top_k": 2,
+        },
     ]
 
     with TestClient(app) as client:
@@ -106,7 +114,48 @@ def test_concurrent_semantic_search_respects_each_top_k():
 
     for response, payload in zip(responses, requests):
         assert response.status_code == 200
+
         body = response.json()
+
         assert body["query"] == payload["query"]
         assert body["count"] == payload["top_k"]
         assert len(body["results"]) == payload["top_k"]
+
+
+def test_batching_metrics_endpoint():
+    with TestClient(app) as client:
+        response = client.get("/metrics/batching")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    expected_fields = {
+        "total_batches",
+        "total_requests_processed",
+        "average_batch_size",
+        "max_observed_batch_size",
+    }
+
+    assert expected_fields.issubset(data.keys())
+
+    assert data["total_batches"] >= 0
+    assert data["total_requests_processed"] >= 0
+    assert data["average_batch_size"] >= 0
+    assert data["max_observed_batch_size"] >= 0
+
+    if data["total_batches"] == 0:
+        assert data["total_requests_processed"] == 0
+        assert data["average_batch_size"] == 0.0
+    else:
+        assert data["total_requests_processed"] > 0
+
+        assert data["average_batch_size"] == pytest.approx(
+            data["total_requests_processed"]
+            / data["total_batches"]
+        )
+
+        assert (
+            data["max_observed_batch_size"]
+            >= data["average_batch_size"]
+        )
