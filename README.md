@@ -46,3 +46,14 @@ python -m backend.benchmark \
 ```
 
 Each command benchmarks keyword search, batched semantic search, and unbatched semantic search. Run each command multiple times to assess variability.
+## Historical Benchmark Summary
+
+The repository also includes a summary script for an earlier benchmark dataset:
+
+```bash
+python -m backend.summarize_dynamic_batching
+```
+
+This script reads `data/dynamic_batching_trials_v2.jsonl` and writes `data/dynamic_batching_summary.json`. Its results cover concurrency levels 1, 5, 10, and 20.
+
+These historical results are separate from the repeated benchmark runs documented in the main results table above. Do not compare the two sets directly without accounting for differences in trials and benchmark conditions.
