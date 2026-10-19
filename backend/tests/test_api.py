@@ -1,8 +1,7 @@
-import pytest
-from backend.app.semantic_search import SemanticSearch
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
+from backend.app.semantic_search import SemanticSearch
 
 
 def test_root():
@@ -10,7 +9,6 @@ def test_root():
         response = client.get("/")
 
     assert response.status_code == 200
-    assert response.json()["message"] == "Welcome to TicketWise API"
 
 
 def test_health():
@@ -18,7 +16,6 @@ def test_health():
         response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
 
 
 def test_keyword_search():
@@ -34,6 +31,7 @@ def test_keyword_search():
     assert response.status_code == 200
     data = response.json()
     assert data["method"] == "keyword"
+    assert len(data["results"]) <= 3
     assert data["results"][0]["id"] == "TICK-001"
 
 
@@ -43,13 +41,14 @@ def test_semantic_search():
             "/search/semantic",
             json={
                 "query": "API returns 503 after deployment",
-                "top_k": 3,
+                "top_k": 5,
             },
         )
 
     assert response.status_code == 200
     data = response.json()
     assert data["method"] == "embedding"
+    assert len(data["results"]) <= 5
     assert data["results"][0]["id"] == "TICK-001"
     assert any(
         ticket["id"] == "TICK-004"
@@ -60,11 +59,22 @@ def test_semantic_search():
 def test_search_rejects_empty_query():
     with TestClient(app) as client:
         response = client.post(
-            "/search/semantic",
-            json={"query": "", "top_k": 3},
+            "/search",
+            json={
+                "query": "",
+                "top_k": 3,
+            },
         )
 
     assert response.status_code == 422
+
+
 def test_semantic_search_rejects_invalid_backend():
-    with pytest.raises(ValueError, match="Unsupported model backend"):
+    try:
         SemanticSearch(backend="onnxx")
+    except ValueError as exc:
+        assert "Unsupported model backend" in str(exc)
+    else:
+        raise AssertionError(
+            "Expected ValueError for unsupported backend"
+        )

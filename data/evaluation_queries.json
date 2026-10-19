@@ -1,4 +1,3 @@
-
 [
   {
     "query": "API returns 503 after deployment",
@@ -10,15 +9,94 @@
   },
   {
     "query": "database connection pool exhausted during peak traffic",
-    "relevant_ticket_ids": ["TICK-002"]
+    "relevant_ticket_ids": ["TICK-002", "TICK-009"]
   },
   {
     "query": "users cannot sign in after changing their password",
-    "relevant_ticket_ids": ["TICK-003"]
+    "relevant_ticket_ids": ["TICK-003", "TICK-011"]
   },
   {
     "query": "dashboard is slow because database queries take too long",
-    "relevant_ticket_ids": ["TICK-005"]
+    "relevant_ticket_ids": ["TICK-005", "TICK-012"]
+  },
+  {
+    "query": "API gateway returns bad gateway errors",
+    "relevant_ticket_ids": ["TICK-006"]
+  },
+  {
+    "query": "deployment health checks fail after a release",
+    "relevant_ticket_ids": ["TICK-007", "TICK-024"]
+  },
+  {
+    "query": "database queries time out when traffic is high",
+    "relevant_ticket_ids": ["TICK-008"]
+  },
+  {
+    "query": "database connections are leaked until the pool runs out",
+    "relevant_ticket_ids": ["TICK-009", "TICK-002"]
+  },
+  {
+    "query": "password reset link has expired",
+    "relevant_ticket_ids": ["TICK-010"]
+  },
+  {
+    "query": "authentication fails with unauthorized after password change",
+    "relevant_ticket_ids": ["TICK-011", "TICK-003"]
+  },
+  {
+    "query": "dashboard takes several seconds to render",
+    "relevant_ticket_ids": ["TICK-012", "TICK-005"]
+  },
+  {
+    "query": "CPU usage spikes after releasing the application",
+    "relevant_ticket_ids": ["TICK-013"]
+  },
+  {
+    "query": "payment succeeded but the order is still pending",
+    "relevant_ticket_ids": ["TICK-014"]
+  },
+  {
+    "query": "payment gateway intermittently returns errors",
+    "relevant_ticket_ids": ["TICK-015"]
+  },
+  {
+    "query": "customers are charged twice for one order",
+    "relevant_ticket_ids": ["TICK-016"]
+  },
+  {
+    "query": "users do not receive email notifications",
+    "relevant_ticket_ids": ["TICK-017"]
+  },
+  {
+    "query": "notification processing queue keeps growing",
+    "relevant_ticket_ids": ["TICK-018"]
+  },
+  {
+    "query": "uploaded files cannot be accessed due to permission errors",
+    "relevant_ticket_ids": ["TICK-019"]
+  },
+  {
+    "query": "uploading large documents fails",
+    "relevant_ticket_ids": ["TICK-020"]
+  },
+  {
+    "query": "service discovery returns outdated backend addresses",
+    "relevant_ticket_ids": ["TICK-021"]
+  },
+  {
+    "query": "expired TLS certificate prevents API requests",
+    "relevant_ticket_ids": ["TICK-022"]
+  },
+  {
+    "query": "cache misses cause more database queries and higher load",
+    "relevant_ticket_ids": ["TICK-023"]
+  },
+  {
+    "query": "containers repeatedly restart after deployment",
+    "relevant_ticket_ids": ["TICK-024"]
+  },
+  {
+    "query": "API rate limiter blocks legitimate client requests",
+    "relevant_ticket_ids": ["TICK-025"]
   }
 ]
-

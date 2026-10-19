@@ -1,3 +1,4 @@
+
 [
   {
     "id": "TICK-001",
@@ -28,5 +29,125 @@
     "title": "Slow dashboard queries",
     "description": "The dashboard loads slowly because several database queries take too long to complete.",
     "category": "performance"
+  },
+  {
+    "id": "TICK-006",
+    "title": "HTTP 502 errors from API gateway",
+    "description": "The API gateway returns HTTP 502 when forwarding requests to backend services. The issue started after a configuration change.",
+    "category": "networking"
+  },
+  {
+    "id": "TICK-007",
+    "title": "Deployment causes health checks to fail",
+    "description": "New application instances fail readiness and liveness checks after deployment, causing the orchestrator to restart them repeatedly.",
+    "category": "deployment"
+  },
+  {
+    "id": "TICK-008",
+    "title": "Database queries time out during peak hours",
+    "description": "SQL queries exceed the configured timeout during high traffic. Query duration increases as concurrent database load rises.",
+    "category": "database"
+  },
+  {
+    "id": "TICK-009",
+    "title": "Connection leaks exhaust database connections",
+    "description": "Database connections are not returned to the pool after requests complete. The pool eventually reaches its maximum capacity.",
+    "category": "database"
+  },
+  {
+    "id": "TICK-010",
+    "title": "Password reset link is expired",
+    "description": "Users receive an expired or invalid token message when opening password reset links from their email.",
+    "category": "authentication"
+  },
+  {
+    "id": "TICK-011",
+    "title": "Login returns unauthorized after password change",
+    "description": "Authentication requests return HTTP 401 after users change their passwords, even when the new credentials are correct.",
+    "category": "authentication"
+  },
+  {
+    "id": "TICK-012",
+    "title": "Dashboard page takes several seconds to load",
+    "description": "The analytics dashboard renders slowly because it retrieves large result sets and performs expensive aggregations.",
+    "category": "performance"
+  },
+  {
+    "id": "TICK-013",
+    "title": "CPU usage spikes after application release",
+    "description": "Application CPU utilization increases sharply after a release, causing slower responses and occasional failed health checks.",
+    "category": "performance"
+  },
+  {
+    "id": "TICK-014",
+    "title": "Payment charged but order remains pending",
+    "description": "Customers are charged successfully, but the order service continues to display the order as pending.",
+    "category": "payments"
+  },
+  {
+    "id": "TICK-015",
+    "title": "Payment gateway returns intermittent errors",
+    "description": "Checkout requests intermittently fail with gateway errors when communicating with the external payment provider.",
+    "category": "payments"
+  },
+  {
+    "id": "TICK-016",
+    "title": "Duplicate payment transactions",
+    "description": "Some customers are charged twice after retrying checkout when the first payment request appears to time out.",
+    "category": "payments"
+  },
+  {
+    "id": "TICK-017",
+    "title": "Email notifications are not delivered",
+    "description": "Account and order emails are missing because the notification worker fails to process queued messages.",
+    "category": "notifications"
+  },
+  {
+    "id": "TICK-018",
+    "title": "Notification queue backlog keeps growing",
+    "description": "Queued notification messages accumulate faster than workers can process them, delaying email delivery.",
+    "category": "notifications"
+  },
+  {
+    "id": "TICK-019",
+    "title": "Uploaded files return access denied",
+    "description": "Users receive permission errors when downloading uploaded documents from object storage.",
+    "category": "storage"
+  },
+  {
+    "id": "TICK-020",
+    "title": "File uploads fail for large documents",
+    "description": "Uploads of large files fail when the request exceeds the configured body-size limit or times out.",
+    "category": "storage"
+  },
+  {
+    "id": "TICK-021",
+    "title": "Service discovery returns stale backend addresses",
+    "description": "Requests are routed to outdated backend instances because the service registry retains stale endpoint information.",
+    "category": "networking"
+  },
+  {
+    "id": "TICK-022",
+    "title": "TLS certificate expiration breaks API requests",
+    "description": "Clients cannot establish secure HTTPS connections after the API certificate expires.",
+    "category": "networking"
+  },
+  {
+    "id": "TICK-023",
+    "title": "Cache misses increase database load",
+    "description": "A rise in cache misses causes more requests to reach the database, increasing response times and database utilization.",
+    "category": "performance"
+  },
+  {
+    "id": "TICK-024",
+    "title": "Container restarts repeatedly after deployment",
+    "description": "Application containers enter a restart loop following a release because the process fails during startup.",
+    "category": "deployment"
+  },
+  {
+    "id": "TICK-025",
+    "title": "API rate limit rejects legitimate requests",
+    "description": "The API returns HTTP 429 for valid clients because rate-limit counters are shared incorrectly across requests.",
+    "category": "api"
   }
 ]
