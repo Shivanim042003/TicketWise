@@ -1,0 +1,32 @@
+[
+  {
+    "id": "TICK-001",
+    "title": "API returns 503 after deployment",
+    "description": "The application API returns HTTP 503 after the latest deployment. Restarting the service temporarily resolves the issue.",
+    "category": "deployment"
+  },
+  {
+    "id": "TICK-002",
+    "title": "Database connection pool exhausted",
+    "description": "Requests fail because the database connection pool reaches its maximum size during peak traffic.",
+    "category": "database"
+  },
+  {
+    "id": "TICK-003",
+    "title": "Login fails after password reset",
+    "description": "Users cannot log in after resetting their passwords. The authentication service returns an unexpected error.",
+    "category": "authentication"
+  },
+  {
+    "id": "TICK-004",
+    "title": "Service unavailable after release",
+    "description": "The backend becomes unavailable after a new release. Application logs show repeated upstream connection failures.",
+    "category": "deployment"
+  },
+  {
+    "id": "TICK-005",
+    "title": "Slow dashboard queries",
+    "description": "The dashboard loads slowly because several database queries take too long to complete.",
+    "category": "performance"
+  }
+]
