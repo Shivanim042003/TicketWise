@@ -1,47 +1,48 @@
+# TicketWise — Dynamic Batching Performance
 
-## Dynamic Batching Performance
+TicketWise implements dynamic batching for semantic search. Concurrent queries are collected into bounded batches and encoded together using Sentence Transformers.
 
-TicketWise supports dynamic batching for semantic search. Concurrent
-queries are collected into bounded batches and encoded together using
-Sentence Transformers.
+## Benchmark Results
 
-### Benchmark Results
+The following results compare `/search/semantic` with `/search/semantic/unbatched`. Each result is the arithmetic mean of three benchmark runs at the same concurrency level. Each run measured 200 requests per endpoint after three warm-up requests.
 
-The following results compare batched and unbatched semantic search
-using 200 measured requests per endpoint per trial, with two trials
-at each concurrency level.
+| Concurrency | Unbatched Throughput | Batched Throughput | Throughput Speedup | Unbatched p95 | Batched p95 | p95 Reduction |
+|---:|---:|---:|---:|---:|---:|---:|
+| 5 | 61.30 req/s | 152.25 req/s | 2.48× | 105.50 ms | 44.05 ms | 58.25% |
+| 10 | 46.32 req/s | 205.15 req/s | 4.43× | 280.21 ms | 67.42 ms | 75.94% |
 
-| Concurrency | Unbatched Throughput | Batched Throughput | Speedup | p95 Latency Reduction |
-|---:|---:|---:|---:|---:|
-| 1 | 70.75 req/s | 47.08 req/s | 0.67x | -40.81% |
-| 5 | 77.54 req/s | 174.93 req/s | 2.26x | 52.18% |
-| 10 | 66.84 req/s | 266.00 req/s | 3.98x | 79.53% |
-| 20 | 55.98 req/s | 339.21 req/s | 6.06x | 86.71% |
+Latency figures are arithmetic means of the trial-level percentiles, not percentiles calculated from pooled individual requests.
 
-### Observed Batch Sizes
+## Methodology
 
-| Concurrency | Average Batch Size |
-|---:|---:|
-| 1 | 1.00 |
-| 5 | 5.00 |
-| 10 | 5.06 |
-| 20 | 7.69 |
+- 200 measured requests per endpoint per trial.
+- Three planned trials at each concurrency level, with three warm-up requests per endpoint.
+- Concurrency levels of 5 and 10 were tested.
+- Batched and unbatched semantic-search endpoints used the same query and `top_k=3`.
+- All reported runs completed with zero request errors.
+- An additional concurrency-10 run was performed but excluded from the three-run averages above.
+- Results were collected locally and should not be treated as production performance guarantees.
 
-### Methodology and Limitations
+## Interpretation and Limitations
 
-- Each trial measured 200 requests per endpoint after five warm-up requests.
-- Two trials were performed at each concurrency level, alternating
-  which endpoint ran first.
-- The batch size was capped at eight queries.
-- All reported trials completed with zero request errors.
-- Results were collected locally and should not be treated as
-  production performance guarantees.
-- These measurements describe the current workload and environment;
-  additional trials and larger, representative datasets are needed
-  to establish general performance characteristics.
+Dynamic batching improved semantic-search throughput in these experiments, with a larger observed advantage at concurrency 10. It also reduced mean p95 latency at both tested concurrency levels.
 
-To reproduce the benchmark summary:
+These measurements describe the current machine, model, workload, and application configuration. Results may vary with hardware, model choice, dataset size, query distribution, batch settings, and server load. Further testing with representative workloads is needed before making production capacity claims.
+
+## Reproducing the Benchmark
+
+Start the TicketWise API server, activate the project virtual environment, and run:
 
 ```bash
-python -m backend.summarize_dynamic_batching
+python -m backend.benchmark \
+  --requests 200 \
+  --concurrency 5 \
+  --output data/profiling/reproduction_c5.csv
+
+python -m backend.benchmark \
+  --requests 200 \
+  --concurrency 10 \
+  --output data/profiling/reproduction_c10.csv
 ```
+
+Each command benchmarks keyword search, batched semantic search, and unbatched semantic search. Run each command multiple times to assess variability.
