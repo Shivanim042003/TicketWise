@@ -78,3 +78,35 @@ def test_semantic_search_rejects_invalid_backend():
         raise AssertionError(
             "Expected ValueError for unsupported backend"
         )
+
+def test_concurrent_semantic_search_respects_each_top_k():
+    from concurrent.futures import ThreadPoolExecutor
+
+    from fastapi.testclient import TestClient
+
+    from backend.app.main import app
+
+    requests = [
+        {"query": "API returns 503 after deployment", "top_k": 1},
+        {"query": "database connection timeout", "top_k": 3},
+        {"query": "login fails after password reset", "top_k": 2},
+    ]
+
+    with TestClient(app) as client:
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            responses = list(
+                executor.map(
+                    lambda payload: client.post(
+                        "/search/semantic",
+                        json=payload,
+                    ),
+                    requests,
+                )
+            )
+
+    for response, payload in zip(responses, requests):
+        assert response.status_code == 200
+        body = response.json()
+        assert body["query"] == payload["query"]
+        assert body["count"] == payload["top_k"]
+        assert len(body["results"]) == payload["top_k"]
