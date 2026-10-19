@@ -1,4 +1,5 @@
-
+import pytest
+from backend.app.semantic_search import SemanticSearch
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
@@ -64,3 +65,6 @@ def test_search_rejects_empty_query():
         )
 
     assert response.status_code == 422
+def test_semantic_search_rejects_invalid_backend():
+    with pytest.raises(ValueError, match="Unsupported model backend"):
+        SemanticSearch(backend="onnxx")
