@@ -50,3 +50,28 @@ return this ticket.
 These scores are similarity values, not probabilities. This is a preliminary
 experiment on only five tickets and one query; it does not establish overall
 retrieval quality.
+
+## Retrieval evaluation: keyword vs. embeddings
+
+Evaluation set: 5 queries over 5 tickets.
+Relevance judgments: manually labeled ticket IDs.
+Embedding model: sentence-transformers/all-MiniLM-L6-v2.
+Similarity: cosine similarity of normalized embeddings.
+
+| Metric | Keyword search | Embedding search |
+|---|---:|---:|
+| Mean Recall@1 | 0.800 | 0.800 |
+| Mean Recall@3 | 0.900 | 1.000 |
+| MRR | 1.000 | 1.000 |
+
+### Interpretation
+
+Embedding search improved Mean Recall@3 by 0.100 on this small evaluation
+set. It retrieved both labeled deployment-related tickets in the top three
+for the first query, whereas keyword search missed TICK-004.
+
+Mean Recall@1 and MRR were unchanged. Every query's first result was
+relevant for both methods, but the evaluation set is too small to establish
+general performance superiority.
+
+These are preliminary results on five tickets and five queries.
