@@ -1,4 +1,5 @@
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -59,6 +60,18 @@ class SearchRequest(BaseModel):
     top_k: int = Field(default=5, ge=1, le=20)
 
 
+def apply_similarity_threshold(results: list[dict]) -> list[dict]:
+    """Reject semantic results when the best score is below the threshold."""
+    threshold = float(
+        os.getenv("TICKETWISE_MIN_SIMILARITY", "0.4396")
+    )
+
+    if not results or results[0]["score"] < threshold:
+        return []
+
+    return results
+
+
 @app.get("/")
 def root():
     return {"message": "Welcome to TicketWise API"}
@@ -107,6 +120,7 @@ async def semantic_search(
             top_k=request.top_k,
         )
     )
+    results = apply_similarity_threshold(results)
 
     return {
         "query": request.query,
@@ -130,6 +144,7 @@ def semantic_search_unbatched(
         query=request.query,
         top_k=request.top_k,
     )
+    results = apply_similarity_threshold(results)
 
     return {
         "query": request.query,

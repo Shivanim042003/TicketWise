@@ -159,3 +159,25 @@ def test_batching_metrics_endpoint():
             data["max_observed_batch_size"]
             >= data["average_batch_size"]
         )
+def test_similarity_threshold_rejects_unrelated_query():
+    with TestClient(app) as client:
+        response = client.post(
+            "/search/semantic",
+            json={"query": "What is the weather forecast tomorrow?"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["results"] == []
+    assert response.json()["count"] == 0
+
+
+def test_similarity_threshold_keeps_relevant_query():
+    with TestClient(app) as client:
+        response = client.post(
+            "/search/semantic",
+            json={"query": "API returns 503 after deployment"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["count"] > 0
+    assert response.json()["results"][0]["id"] == "TICK-001"
