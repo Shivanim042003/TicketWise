@@ -1,0 +1,302 @@
+[
+  {
+    "query": "The API started returning service unavailable errors right after the latest deployment",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-001", "TICK-004"]
+  },
+  {
+    "query": "Application instances repeatedly fail their health checks after a release",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-007", "TICK-024"]
+  },
+  {
+    "query": "The backend is unreachable and upstream connections are failing",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-004", "TICK-006"]
+  },
+  {
+    "query": "The service crashes during startup and its container keeps restarting",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-024", "TICK-007"]
+  },
+  {
+    "query": "Database connections run out when many requests arrive simultaneously",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-002", "TICK-009"]
+  },
+  {
+    "query": "SQL requests take too long and exceed their timeout during busy periods",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-008", "TICK-005"]
+  },
+  {
+    "query": "The dashboard is slow because database queries are expensive",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-005", "TICK-012"]
+  },
+  {
+    "query": "Database capacity is exhausted because connections are never released",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-009", "TICK-002"]
+  },
+  {
+    "query": "Users get an authentication error after changing their password",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-003", "TICK-011"]
+  },
+  {
+    "query": "Password reset emails contain links that are already expired",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-010"]
+  },
+  {
+    "query": "The login endpoint returns unauthorized even with the new password",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-011", "TICK-003"]
+  },
+  {
+    "query": "Customers complete payment but their orders remain pending",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-014"]
+  },
+  {
+    "query": "Checkout intermittently fails when calling the payment provider",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-015"]
+  },
+  {
+    "query": "Retrying a timed-out checkout can charge the customer twice",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-016"]
+  },
+  {
+    "query": "Order confirmation emails are missing because the notification worker is stuck",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-017", "TICK-018"]
+  },
+  {
+    "query": "The notification backlog grows faster than workers can process messages",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-018", "TICK-017"]
+  },
+  {
+    "query": "Large document uploads fail due to request size limits or timeouts",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-020"]
+  },
+  {
+    "query": "Downloading an uploaded object fails with a permissions error",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-019"]
+  },
+  {
+    "query": "The service registry sends traffic to old backend instances",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-021"]
+  },
+  {
+    "query": "HTTPS requests fail because the server certificate has expired",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-022"]
+  },
+  {
+    "query": "Cache misses cause additional database traffic and slower responses",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-023", "TICK-005"]
+  },
+  {
+    "query": "The API rate limiter blocks valid clients with HTTP 429",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-025"]
+  },
+  {
+    "query": "The gateway returns 502 when it cannot forward requests to the backend",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-006", "TICK-004"]
+  },
+  {
+    "query": "CPU consumption rises sharply after deploying the new application version",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-013", "TICK-007"]
+  },
+  {
+    "query": "The analytics dashboard takes seconds to render large result sets",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-012", "TICK-005"]
+  },
+  {
+    "query": "The API is returning 502 errors instead of 503 errors",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-006", "TICK-001", "TICK-004"]
+  },
+  {
+    "query": "Requests fail after a deployment because the application is unhealthy",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-007", "TICK-001", "TICK-024"]
+  },
+  {
+    "query": "Database requests slow down when the cache stops serving entries",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-023", "TICK-008", "TICK-005"]
+  },
+  {
+    "query": "The database pool is exhausted by queries that run too long",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-002", "TICK-008", "TICK-009"]
+  },
+  {
+    "query": "Users cannot authenticate because password reset links have expired",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-010", "TICK-003", "TICK-011"]
+  },
+  {
+    "query": "A payment request times out and the customer is charged more than once",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-016", "TICK-015", "TICK-014"]
+  },
+  {
+    "query": "The payment completed but the order confirmation email never arrived",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-014", "TICK-017", "TICK-018"]
+  },
+  {
+    "query": "Large file uploads succeed but later downloads return access denied",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-019", "TICK-020"]
+  },
+  {
+    "query": "The API cannot reach the backend because service discovery has stale addresses",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-021", "TICK-006", "TICK-004"]
+  },
+  {
+    "query": "API requests fail because the TLS certificate expired",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-022", "TICK-006", "TICK-001"]
+  },
+  {
+    "query": "The dashboard becomes slow after CPU usage increases following a release",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-013", "TICK-012", "TICK-005"]
+  },
+  {
+    "query": "Valid requests are rejected because the API rate limit is configured incorrectly",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-025", "TICK-006"]
+  },
+  {
+    "query": "Repeated container restarts happen because readiness checks fail",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-007", "TICK-024"]
+  },
+  {
+    "query": "Email delivery is delayed because the message queue is growing",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-018", "TICK-017"]
+  },
+  {
+    "query": "Database connection leaks cause latency spikes during peak traffic",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-009", "TICK-002", "TICK-008"]
+  },
+  {
+    "query": "How can I configure a wireless printer on a home network?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Explain binary search trees and AVL tree rotations",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Help me plan a week-long vacation in Japan",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "What is the best way to bake a chocolate cake?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Recommend universities for an economics degree",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "How do I improve Wi-Fi signal strength in my apartment?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Write a Python function to sort a list of integers",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "How can I recover photos from a damaged camera SD card?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Suggest a vegetarian lentil dinner recipe",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Explain the difference between a mortgage and a lease",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "My laptop brightness keys stopped working",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "What are the symptoms and treatment of seasonal allergies?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Can you help me write a cover letter for a marketing job?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Explain how compound interest works in a savings account",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "What exercises can help prepare for a half marathon?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "How do I change the wallpaper on my phone?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Can you compare different electric vehicle models?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "What documents are needed to apply for a passport?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Explain the water cycle for a school assignment",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "How do I make a monthly household budget?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  }
+]

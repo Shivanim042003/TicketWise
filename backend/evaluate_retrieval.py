@@ -1,4 +1,3 @@
-
 import json
 import os
 from collections import defaultdict
@@ -10,14 +9,31 @@ from backend.app.semantic_search import SemanticSearch
 
 
 ROOT = Path(__file__).resolve().parents[1]
-QUERIES_PATH = ROOT / "data" / "evaluation_queries_v2.json"
+
+DEFAULT_QUERIES_PATH = "data/evaluation_queries_v2.json"
+QUERIES_PATH = (
+    ROOT
+    / os.getenv("TICKETWISE_EVAL_DATASET", DEFAULT_QUERIES_PATH)
+).resolve()
 
 TOP_K_VALUES = (1, 3, 5)
 BACKENDS = ("pytorch", "onnx")
+VALID_QUERY_TYPES = {"paraphrase", "hard_negative", "no_match"}
 
 
 def load_queries():
-    """Load and validate the extended evaluation dataset."""
+    """Load and validate the selected evaluation dataset."""
+    if not QUERIES_PATH.is_relative_to(ROOT):
+        raise ValueError(
+            "Evaluation dataset must be located inside the project directory."
+        )
+
+    if not QUERIES_PATH.is_file():
+        raise FileNotFoundError(
+            f"Evaluation dataset not found: {QUERIES_PATH}\n"
+            "Set TICKETWISE_EVAL_DATASET to a valid project-relative JSON path."
+        )
+
     with QUERIES_PATH.open("r", encoding="utf-8") as file:
         queries = json.load(file)
 
@@ -25,11 +41,15 @@ def load_queries():
         raise ValueError("Evaluation dataset must be a non-empty JSON list.")
 
     for index, item in enumerate(queries):
-        if not isinstance(item.get("query"), str) or not item["query"].strip():
+        if not isinstance(item, dict):
+            raise ValueError(f"Query {index} must be a JSON object.")
+
+        query = item.get("query")
+        if not isinstance(query, str) or not query.strip():
             raise ValueError(f"Query {index} has no valid query string.")
 
         query_type = item.get("type")
-        if query_type not in {"paraphrase", "hard_negative", "no_match"}:
+        if query_type not in VALID_QUERY_TYPES:
             raise ValueError(
                 f"Query {index} has unsupported type: {query_type!r}"
             )
@@ -38,6 +58,19 @@ def load_queries():
         if not isinstance(relevant_ids, list):
             raise ValueError(
                 f"Query {index} must contain relevant_ticket_ids as a list."
+            )
+
+        if any(
+            not isinstance(ticket_id, str) or not ticket_id.strip()
+            for ticket_id in relevant_ids
+        ):
+            raise ValueError(
+                f"Query {index} contains an invalid ticket ID."
+            )
+
+        if len(relevant_ids) != len(set(relevant_ids)):
+            raise ValueError(
+                f"Query {index} contains duplicate relevant ticket IDs."
             )
 
         if query_type == "no_match" and relevant_ids:
@@ -65,7 +98,7 @@ def recall_at_k(ranked_ids, relevant_ids, k):
 
 
 def reciprocal_rank(ranked_ids, relevant_ids):
-    """Calculate reciprocal rank."""
+    """Calculate reciprocal rank of the first relevant result."""
     relevant_ids = set(relevant_ids)
 
     if not relevant_ids:
@@ -183,7 +216,12 @@ def main():
         "total_queries": len(queries),
     }
 
-    output_path = ROOT / "data" / "profiling" / "retrieval_evaluation_v2.json"
+    output_path = (
+        ROOT
+        / "data"
+        / "profiling"
+        / f"retrieval_evaluation_{QUERIES_PATH.stem}.json"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with output_path.open("w", encoding="utf-8") as file:
@@ -192,7 +230,9 @@ def main():
     for backend in BACKENDS:
         result = results["backends"][backend]
 
-        print(f"\n{backend.upper()}")
+        print(f"\n{backend.upper()} overall:")
+        print(json.dumps(result["overall"], indent=2))
+        print(f"\n{backend.upper()} by query type:")
         print(json.dumps(result["by_type"], indent=2))
 
     print("\nRanking consistency:")
