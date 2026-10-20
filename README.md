@@ -144,17 +144,24 @@ This generates the aggregate JSON, CSV, and Markdown report under `data/profilin
 
 ## 4. Retrieval-Quality Evaluation
 
-TicketWise includes an evaluation script for measuring retrieval quality using labeled queries.
+TicketWise evaluates semantic retrieval using labeled support-ticket queries. The evaluator supports selecting a dataset with the `TICKETWISE_EVAL_DATASET` environment variable.
 
-Run:
+### Run the evaluations
 
-```bash
-python -m backend.evaluate_retrieval
-```
+Run the default 18-query v2 evaluation:
 
-The current `data/evaluation_queries_v2.json` evaluation contains 18 queries across paraphrase, hard-negative, and no-match categories.
+    python -m backend.evaluate_retrieval
 
-### Latest semantic-only results
+Run the 60-query v4 evaluation:
+
+    TICKETWISE_EVAL_DATASET=data/evaluation_queries_v4.json python -m backend.evaluate_retrieval
+
+Reports are saved under `data/profiling/`:
+
+- v2: `retrieval_evaluation_evaluation_queries_v2.json`
+- v4: `retrieval_evaluation_evaluation_queries_v4.json`
+
+### v2 results: 18 queries
 
 | Metric | PyTorch | ONNX |
 |---|---:|---:|
@@ -164,20 +171,33 @@ The current `data/evaluation_queries_v2.json` evaluation contains 18 queries acr
 | MRR | 0.792 | 0.792 |
 | Identical full rankings | 18/18 | 18/18 |
 
-The evaluation found identical full rankings for all 18 queries across the two backends.
+### v4 results: 60 queries
 
-Recall@k measures how much of the labeled relevant-ticket set is retrieved within the top k results, according to the evaluation script. Mean reciprocal rank (MRR) rewards placing a relevant result near the top of the ranking.
+| Metric | PyTorch | ONNX |
+|---|---:|---:|
+| Recall@1 | 0.567 | 0.567 |
+| Recall@3 | 0.946 | 0.946 |
+| Recall@5 | 0.983 | 0.983 |
+| MRR | 1.000 | 1.000 |
+| Identical full rankings | 60/60 | 60/60 |
 
-No-match queries have no relevant ticket IDs, so recall and MRR are undefined for that category. Rejection behavior should be evaluated separately.
+The datasets differ in size and composition, so these results should not be interpreted as a direct improvement from v2 to v4. The v4 dataset contains 25 paraphrase, 15 hard-negative, and 20 no-match queries.
 
-### Important evaluation limitations
+Recall@k measures the fraction of labeled relevant ticket IDs retrieved in the top k results. Mean reciprocal rank (MRR) measures the rank of the first relevant result. With multiple relevant ticket IDs per query, MRR can be 1.0 even when Recall@1 is below 1.0.
 
-- The dataset contains only 18 queries and is too small to establish general production retrieval quality.
-- Some relevance labels are provisional and need independent review.
-- The reported metrics depend on the chosen labels, ticket corpus, query wording, and evaluation implementation.
-- Results should be treated as development measurements, not a guarantee of performance on unseen queries.
+### Similarity threshold experiment
 
-The evaluation script writes its report to `data/profiling/retrieval_evaluation_v2.json`.
+The semantic endpoints use a configurable minimum similarity threshold controlled by `TICKETWISE_MIN_SIMILARITY` (default: `0.4396`). On the current v4 dataset, this threshold accepted all 40 queries labeled as relevant and rejected all 20 labeled no-match queries.
+
+This is a development-set result, not an estimate of production accuracy. The threshold was selected using earlier evaluation data, and the query labels are provisional.
+
+### Limitations
+
+- Both datasets are small, and some relevance labels require independent review.
+- Results depend on query wording, relevance labels, the ticket corpus, and the evaluation implementation.
+- Identical PyTorch and ONNX rankings demonstrate consistency on these test queries, not equivalent performance on every possible workload.
+- No-match queries have no relevant ticket IDs, so Recall@k and MRR are undefined for that category; rejection behavior is measured separately.
+- Validate retrieval quality and threshold behavior on a larger, independently labeled held-out dataset before production use.
 
 ## 5. Experimental Hybrid Ranking
 
