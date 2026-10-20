@@ -1,37 +1,52 @@
-# TicketWise — Dynamic Batching Performance
+# TicketWise — Semantic Search and Model Serving Optimization
 
-TicketWise implements dynamic batching for semantic search. Concurrent queries are collected into bounded batches and encoded together using Sentence Transformers.
+TicketWise is a semantic-search API for support tickets, focused on efficient model serving, dynamic batching, inference-backend comparison, and retrieval-quality evaluation.
 
-## Benchmark Results
+The project explores three main questions:
 
-The following results compare `/search/semantic` with `/search/semantic/unbatched`. Each result is the arithmetic mean of three benchmark runs at the same concurrency level. Each run measured 200 requests per endpoint after three warm-up requests.
+- How much can dynamic batching improve semantic-search API performance?
+- How does ONNX Runtime compare with PyTorch for CPU inference?
+- How accurately can semantic search retrieve relevant support tickets, and can hybrid ranking improve results?
 
-| Concurrency | Unbatched Throughput | Batched Throughput | Throughput Speedup | Unbatched p95 | Batched p95 | p95 Reduction |
+All benchmark numbers below are local experimental measurements, not production performance guarantees.
+
+## 1. Architecture
+
+- **API framework:** FastAPI
+- **Embedding model:** `sentence-transformers/all-MiniLM-L6-v2`
+- **Inference backends:** PyTorch CPU and ONNX Runtime CPU
+- **Retrieval:** Semantic similarity search over support tickets
+- **Batching:** Dynamic batching with a maximum batch size of 8 and a maximum wait time of 5 ms
+- **Semantic endpoint:** `/search/semantic`
+- **Unbatched comparison:** `/search/semantic/unbatched`
+- **Health check:** `/health`
+- **Batching metrics:** `/metrics/batching`
+
+The `/health` endpoint reports which model backend the running application loaded.
+
+## 2. Dynamic Batching Benchmark
+
+These results compare `/search/semantic` with `/search/semantic/unbatched`. Each table value is the arithmetic mean of three benchmark runs at the same concurrency level. Each run measured 200 requests per endpoint after three warm-up requests.
+
+| Concurrency | Unbatched throughput | Batched throughput | Throughput speedup | Unbatched p95 | Batched p95 | p95 reduction |
 |---:|---:|---:|---:|---:|---:|---:|
 | 5 | 61.30 req/s | 152.25 req/s | 2.48× | 105.50 ms | 44.05 ms | 58.25% |
 | 10 | 46.32 req/s | 205.15 req/s | 4.43× | 280.21 ms | 67.42 ms | 75.94% |
 
-Latency figures are arithmetic means of the trial-level percentiles, not percentiles calculated from pooled individual requests.
+Latency values are arithmetic means of the trial-level p95 percentiles, not percentiles calculated from pooled individual requests.
 
-## Methodology
+### Methodology
 
 - 200 measured requests per endpoint per trial.
-- Three planned trials at each concurrency level, with three warm-up requests per endpoint.
-- Concurrency levels of 5 and 10 were tested.
-- Batched and unbatched semantic-search endpoints used the same query and `top_k=3`.
+- Three planned trials at concurrency levels 5 and 10.
+- Three warm-up requests per endpoint.
+- The batched and unbatched endpoints used the same query and `top_k=3`.
 - All reported runs completed with zero request errors.
-- An additional concurrency-10 run was performed but excluded from the three-run averages above.
-- Results were collected locally and should not be treated as production performance guarantees.
+- An additional concurrency-10 run was excluded from the three-run averages.
 
-## Interpretation and Limitations
+### Reproduce the benchmark
 
-Dynamic batching improved semantic-search throughput in these experiments, with a larger observed advantage at concurrency 10. It also reduced mean p95 latency at both tested concurrency levels.
-
-These measurements describe the current machine, model, workload, and application configuration. Results may vary with hardware, model choice, dataset size, query distribution, batch settings, and server load. Further testing with representative workloads is needed before making production capacity claims.
-
-## Reproducing the Benchmark
-
-Start the TicketWise API server, activate the project virtual environment, and run:
+Start the API server, activate the virtual environment, and run:
 
 ```bash
 python -m backend.benchmark \
@@ -45,64 +60,13 @@ python -m backend.benchmark \
   --output data/profiling/reproduction_c10.csv
 ```
 
-Each command benchmarks keyword search, batched semantic search, and unbatched semantic search. Run each command multiple times to assess variability.
-## Historical Benchmark Summary
+Each command benchmarks keyword search, batched semantic search, and unbatched semantic search. Repeat each run to assess variability.
 
-The repository also includes a summary script for an earlier benchmark dataset:
+These results describe the tested machine, model, workload, and application configuration. They should not be treated as production capacity guarantees.
 
-```bash
-python -m backend.summarize_dynamic_batching
-```
+## 3. PyTorch vs. ONNX Runtime
 
-This script reads `data/dynamic_batching_trials_v2.jsonl` and writes `data/dynamic_batching_summary.json`. Its results cover concurrency levels 1, 5, 10, and 20.
-
-These historical results are separate from the repeated benchmark runs documented in the main results table above. Do not compare the two sets directly without accounting for differences in trials and benchmark conditions.
-
----
-
-## Model Serving Optimization: PyTorch vs. ONNX Runtime
-
-TicketWise supports two CPU inference backends for semantic search:
-PyTorch and ONNX Runtime. This experiment compares their API-level
-performance while keeping the model, evaluation queries, and application
-configuration consistent.
-
-### Architecture
-
-- **Embedding model:** `sentence-transformers/all-MiniLM-L6-v2`
-- **Inference backends:** PyTorch CPU and ONNX Runtime CPU
-- **API framework:** FastAPI
-- **Batching:** Dynamic batching with a maximum batch size of 8 and a
-  maximum wait time of 5 ms
-- **Semantic endpoint:** `/search/semantic`
-- **Unbatched comparison endpoint:** `/search/semantic/unbatched`
-- **Backend verification:** `/health` reports the backend loaded by the
-  running application.
-- **Batching metrics:** `/metrics/batching`
-
-Select a backend when starting the server:
-
-```bash
-TICKETWISE_MODEL_BACKEND=pytorch \
-  python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
-```
-
-```bash
-TICKETWISE_MODEL_BACKEND=onnx \
-  python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
-```
-
-Check the loaded backend before benchmarking:
-
-```bash
-curl -s http://127.0.0.1:8000/health
-```
-
-### API Benchmark Results
-
-The following results summarize three trials per backend at each
-concurrency level. Each trial contains 100 measured requests per
-concurrency level after 10 warm-up requests.
+TicketWise supports PyTorch CPU and ONNX Runtime CPU inference. The following results summarize three trials per backend at each concurrency level. Each trial measured 100 requests per concurrency level after 10 warm-up requests.
 
 | Concurrency | Backend | Median throughput | Median p50 | Median p95 | Median p99 |
 |---:|---|---:|---:|---:|---:|
@@ -113,7 +77,7 @@ concurrency level after 10 warm-up requests.
 | 10 | PyTorch | 111.36 req/s | 88.08 ms | 105.51 ms | 109.32 ms |
 | 10 | ONNX | 169.57 req/s | 55.56 ms | 77.04 ms | 79.07 ms |
 
-### Observed ONNX Improvement
+### Observed ONNX improvement
 
 | Concurrency | Throughput improvement | p95 latency reduction |
 |---:|---:|---:|
@@ -121,57 +85,54 @@ concurrency level after 10 warm-up requests.
 | 5 | 110.76% | 46.80% |
 | 10 | 52.27% | 26.98% |
 
-Throughput improvement is calculated relative to PyTorch median throughput.
-Positive p95 latency reduction indicates lower ONNX p95 latency.
+Throughput improvement is relative to PyTorch median throughput. Positive p95 reduction indicates lower ONNX p95 latency.
 
-All measured API requests succeeded in the three trials for both backends.
-These results are local experimental measurements, not production
-capacity guarantees.
+All measured requests succeeded in the reported trials. These results are local experiments; repeatability and performance on other workloads or hardware have not been established.
 
-### Retrieval Quality
+### Configure the inference backend
 
-On the current evaluation set of 25 labeled queries, both backends
-produced identical rankings for all 25 queries.
+For PyTorch:
 
-| Metric | PyTorch | ONNX |
-|---|---:|---:|
-| Recall@1 | 0.820 | 0.820 |
-| Recall@3 | 0.980 | 0.980 |
-| Recall@5 | 1.000 | 1.000 |
-| Identical full rankings | 25/25 | 25/25 |
+```bash
+TICKETWISE_MODEL_BACKEND=pytorch \
+  python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
 
-This indicates that the tested backends preserved retrieval results on
-this evaluation set. The small dataset does not establish equivalent
-quality for every possible query or production workload.
+For ONNX Runtime:
 
-### Reproducing the API Benchmark
+```bash
+TICKETWISE_MODEL_BACKEND=onnx \
+  python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
 
-Start the server in one terminal using the desired backend. In a second
-terminal, activate the virtual environment and run the benchmark.
+Check the loaded backend:
 
-For ONNX:
+```bash
+curl -s http://127.0.0.1:8000/health
+```
+
+### Reproduce the API benchmark
+
+Start the server with the desired backend in one terminal. In another terminal, activate the virtual environment and run:
 
 ```bash
 BENCHMARK_BACKEND=onnx \
   python -m backend.benchmark_api_backends
 ```
 
-For PyTorch:
+Or:
 
 ```bash
 BENCHMARK_BACKEND=pytorch \
   python -m backend.benchmark_api_backends
 ```
 
-The benchmark verifies the loaded backend through `/health` before
-sending measured requests. Results are written to:
+The benchmark checks `/health` before sending requests. Results are written to:
 
 - `data/profiling/api_benchmark_onnx.json`
 - `data/profiling/api_benchmark_pytorch.json`
 
-The benchmark overwrites the corresponding backend result file on each
-run. Copy the JSON file to a separate trial filename after each
-successful run to preserve individual measurements.
+Each run overwrites its corresponding result file. Copy successful outputs to separate trial filenames before repeating the benchmark.
 
 After preserving three trials per backend, aggregate them with:
 
@@ -179,25 +140,111 @@ After preserving three trials per backend, aggregate them with:
 python -m backend.aggregate_api_benchmarks
 ```
 
-This generates:
+This generates the aggregate JSON, CSV, and Markdown report under `data/profiling/`.
 
-- `data/profiling/api_benchmark_aggregate.json`
-- `data/profiling/api_benchmark_aggregate.csv`
-- `data/profiling/api_benchmark_report.md`
+## 4. Retrieval-Quality Evaluation
 
-### Limitations and Next Steps
+TicketWise includes an evaluation script for measuring retrieval quality using labeled queries.
 
-- Only three trials were conducted per backend and concurrency level.
-- Trial-to-trial variation was observed, especially for PyTorch at
-  concurrency 5.
-- Results depend on the hardware, operating system, server load, model,
-  dataset, batching configuration, and query workload.
-- The evaluation set contains only 25 labeled queries.
-- API latency includes application and batching overhead; it is not
-  equivalent to model encoding latency.
-- Further controlled testing and representative workloads are needed
-  before making production performance claims.
+Run:
 
-ONNX is the leading candidate based on these initial measurements.
-Production adoption should follow additional validation of repeatability,
-retrieval quality, and deployment requirements.
+```bash
+python -m backend.evaluate_retrieval
+```
+
+The current `data/evaluation_queries_v2.json` evaluation contains 18 queries across paraphrase, hard-negative, and no-match categories.
+
+### Latest semantic-only results
+
+| Metric | PyTorch | ONNX |
+|---|---:|---:|
+| Recall@1 | 0.361 | 0.361 |
+| Recall@3 | 0.806 | 0.806 |
+| Recall@5 | 0.861 | 0.861 |
+| MRR | 0.792 | 0.792 |
+| Identical full rankings | 18/18 | 18/18 |
+
+The evaluation found identical full rankings for all 18 queries across the two backends.
+
+Recall@k measures how much of the labeled relevant-ticket set is retrieved within the top k results, according to the evaluation script. Mean reciprocal rank (MRR) rewards placing a relevant result near the top of the ranking.
+
+No-match queries have no relevant ticket IDs, so recall and MRR are undefined for that category. Rejection behavior should be evaluated separately.
+
+### Important evaluation limitations
+
+- The dataset contains only 18 queries and is too small to establish general production retrieval quality.
+- Some relevance labels are provisional and need independent review.
+- The reported metrics depend on the chosen labels, ticket corpus, query wording, and evaluation implementation.
+- Results should be treated as development measurements, not a guarantee of performance on unseen queries.
+
+The evaluation script writes its report to `data/profiling/retrieval_evaluation_v2.json`.
+
+## 5. Experimental Hybrid Ranking
+
+TicketWise also includes an experimental lexical-semantic ranking comparison:
+
+```bash
+python -m backend.evaluate_hybrid_retrieval
+```
+
+The experiment combines semantic similarity with lexical word and bigram features using different semantic weights.
+
+| Semantic weight | Recall@1 | Recall@3 | Recall@5 | MRR |
+|---:|---:|---:|---:|---:|
+| 1.0 — semantic only | 0.361 | 0.806 | 0.861 | 0.804 |
+| 0.9 — hybrid | 0.444 | 0.806 | 0.931 | 0.850 |
+| 0.8 — hybrid | 0.417 | 0.806 | 0.958 | 0.808 |
+| 0.7 — hybrid | 0.333 | 0.806 | 0.917 | 0.764 |
+| 0.5 — hybrid | 0.333 | 0.806 | 0.889 | 0.736 |
+
+The 0.9 semantic-weight configuration produced the best Recall@1 and MRR among these tested configurations. The 0.8 configuration produced the highest Recall@5.
+
+These results are exploratory: the evaluation set is small and its labels are not fully independently validated. The hybrid experiment does not establish that hybrid ranking will generalize to new queries. **Semantic-only ranking remains the production behavior; hybrid ranking is experimental.**
+
+The report is written to `data/profiling/hybrid_retrieval_v3.json`.
+
+## 6. Similarity Threshold
+
+Semantic search supports a configurable minimum similarity threshold through the `TICKETWISE_MIN_SIMILARITY` environment variable. The default threshold is `0.4396`.
+
+For example:
+
+```bash
+TICKETWISE_MIN_SIMILARITY=0.50 \
+  python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
+
+The threshold is a development setting calibrated against a small query set. It may reject relevant queries or accept irrelevant ones on other workloads. Evaluate it on a larger, independently labeled dataset before relying on it in production.
+
+## 7. Tests
+
+Run the automated test suite:
+
+```bash
+python -m pytest
+```
+
+The latest recorded run passed all 26 tests across the API, dynamic batcher, and semantic-search test modules. A Starlette deprecation warning was emitted by the test-client integration; it did not cause test failures.
+
+## 8. Historical Benchmark Summary
+
+An earlier benchmark summary script is also available:
+
+```bash
+python -m backend.summarize_dynamic_batching
+```
+
+It reads `data/dynamic_batching_trials_v2.jsonl` and writes `data/dynamic_batching_summary.json`. Its results cover concurrency levels 1, 5, 10, and 20.
+
+These historical measurements are separate from the repeated benchmark runs in this README. Do not compare the datasets directly without accounting for their different trial counts and benchmark conditions.
+
+## 9. Limitations and Next Steps
+
+- Benchmark results come from a local development environment.
+- Only a small number of trials and query examples have been evaluated.
+- API latency includes application and batching overhead; it is not equivalent to model-encoding latency.
+- Retrieval labels need independent review and a larger held-out evaluation set.
+- Performance depends on hardware, operating system, server load, model, batching configuration, and query workload.
+- Production adoption requires additional testing of repeatability, retrieval quality, threshold calibration, and deployment requirements.
+
+ONNX Runtime is the leading candidate based on the current local measurements, while semantic-only retrieval remains the production ranking method pending stronger validation.
