@@ -65,8 +65,14 @@ def root():
 
 
 @app.get("/health")
-def health_check():
-    return {"status": "healthy"}
+def health_check(request: Request):
+    """Report health and the backend loaded by this application."""
+    search_engine: SemanticSearch = request.app.state.semantic_search
+
+    return {
+        "status": "healthy",
+        "model_backend": search_engine.backend,
+    }
 
 
 @app.post("/search")
