@@ -1,0 +1,92 @@
+[
+  {
+    "query": "The service started returning errors immediately after deployment",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-001", "TICK-004", "TICK-007"]
+  },
+  {
+    "query": "Database queries have become slow and are timing out",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-008"]
+  },
+  {
+    "query": "Users are unable to sign in with valid credentials",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-011"]
+  },
+  {
+    "query": "The payment endpoint is failing for customer transactions",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-015"]
+  },
+  {
+    "query": "Notifications are not being delivered to users",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-017", "TICK-018"]
+  },
+  {
+    "query": "Files are failing to upload to storage",
+    "type": "paraphrase",
+    "relevant_ticket_ids": ["TICK-020"]
+  },
+  {
+    "query": "The health check fails after we release a new version",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-007"]
+  },
+  {
+    "query": "The API response time increases under heavy traffic",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-013", "TICK-023"]
+  },
+  {
+    "query": "Our application cannot connect to the remote service",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-004", "TICK-009", "TICK-021"]
+  },
+  {
+    "query": "The cache is returning outdated information",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-021", "TICK-023"]
+  },
+  {
+    "query": "How do I reset my password?",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-003", "TICK-010", "TICK-011"]
+  },
+  {
+    "query": "The server runs out of memory during peak traffic",
+    "type": "hard_negative",
+    "relevant_ticket_ids": ["TICK-002", "TICK-008", "TICK-013"]
+  },
+  {
+    "query": "How can I configure a Kubernetes cluster?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "I need help installing a printer driver",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Explain how binary search trees work",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "What is the weather forecast for tomorrow?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Help me write a cover letter for a software job",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "How do I make a chocolate cake?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  }
+]

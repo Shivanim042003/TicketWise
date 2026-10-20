@@ -1,0 +1,62 @@
+[
+  {
+    "query": "After pushing the latest build, the API responds with service unavailable",
+    "type": "relevant",
+    "relevant_ticket_ids": ["TICK-001", "TICK-004"]
+  },
+  {
+    "query": "The database runs out of available connections when traffic increases",
+    "type": "relevant",
+    "relevant_ticket_ids": ["TICK-002", "TICK-009"]
+  },
+  {
+    "query": "Logging in fails with a 401 even though I entered the correct new password",
+    "type": "relevant",
+    "relevant_ticket_ids": ["TICK-011"]
+  },
+  {
+    "query": "Checkout sometimes fails while contacting the external payment provider",
+    "type": "relevant",
+    "relevant_ticket_ids": ["TICK-015"]
+  },
+  {
+    "query": "Messages are piling up in the notification worker queue",
+    "type": "relevant",
+    "relevant_ticket_ids": ["TICK-018"]
+  },
+  {
+    "query": "Large document uploads keep timing out",
+    "type": "relevant",
+    "relevant_ticket_ids": ["TICK-020"]
+  },
+  {
+    "query": "Can you help me plan a vacation in Japan?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Write a Python program to sort a list of integers",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "What are the best universities for studying economics?",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "My laptop screen brightness buttons do not work",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Suggest a vegetarian dinner recipe with lentils",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  },
+  {
+    "query": "Explain the difference between a mortgage and a lease",
+    "type": "no_match",
+    "relevant_ticket_ids": []
+  }
+]
