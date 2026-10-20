@@ -3,3 +3,8 @@ __pycache__/
 *.py[cod]
 .env
 .pytest_cache/
+# Generated benchmark outputs
+data/profiling/
+data/benchmark_results.csv
+data/dynamic_batching_*.jsonl
+data/dynamic_batching_summary.json

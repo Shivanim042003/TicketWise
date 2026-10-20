@@ -18,28 +18,11 @@ OUTPUT_PATH = (
 )
 TEST_QUERY = "API returns 503 after deployment"
 
-
-
-import argparse
-import asyncio
-import csv
-import json
-import statistics
-import time
-from pathlib import Path
-
-import httpx
-
-
-BASE_URL = "http://127.0.0.1:8000"
-
-OUTPUT_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "data"
-    / "benchmark_results.csv"
-)
-
-TEST_QUERY = "API returns 503 after deployment"
+ENDPOINTS = [
+    "/search",
+    "/search/semantic",
+    "/search/semantic/unbatched",
+]
 
 
 def percentile(values: list[float], p: float) -> float:
@@ -64,7 +47,7 @@ async def benchmark_endpoint(
     requests: int,
     concurrency: int,
 ) -> dict:
-    """Benchmark an endpoint and collect successful request latencies."""
+    """Benchmark an endpoint and collect request latencies."""
     semaphore = asyncio.Semaphore(concurrency)
     latencies_ms: list[float] = []
     errors = 0
@@ -119,7 +102,7 @@ async def benchmark_endpoint(
                 "Is Uvicorn running?"
             ) from exc
 
-    # Measure the full batch of concurrent requests.
+    # Measure the full set of concurrent requests.
     start_all = time.perf_counter()
 
     await asyncio.gather(
@@ -199,7 +182,7 @@ async def main() -> None:
     ) as client:
         results = []
 
-        for endpoint in ["/search", "/search/semantic"]:
+        for endpoint in ENDPOINTS:
             print(f"\nBenchmarking {endpoint}...")
 
             result = await benchmark_endpoint(
