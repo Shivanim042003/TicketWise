@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from collections import defaultdict
@@ -190,6 +191,11 @@ def evaluate_backend(backend, queries):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Evaluate TicketWise semantic retrieval quality."
+    )
+    parser.parse_args()
+
     queries = load_queries()
 
     results = {
