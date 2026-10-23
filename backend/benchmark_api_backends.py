@@ -178,6 +178,26 @@ async def warmup(client, queries):
             ) from exc
 
 
+def validate_semantic_response(payload):
+    """Reject responses that do not match the semantic search contract."""
+    if not isinstance(payload, dict):
+        raise ValueError("Semantic response must be a JSON object.")
+
+    results = payload.get("results")
+    count = payload.get("count")
+
+    if (
+        payload.get("method") != "embedding"
+        or not isinstance(results, list)
+        or not isinstance(count, int)
+        or isinstance(count, bool)
+        or count != len(results)
+    ):
+        raise ValueError(
+            "Unexpected semantic search response structure."
+        )
+
+
 async def benchmark_load(client, queries, concurrency):
     """Measure latency and throughput at a specific concurrency."""
     latencies = []
@@ -199,26 +219,8 @@ async def benchmark_load(client, queries, concurrency):
                 elapsed_ms = (time.perf_counter() - start) * 1000
                 response.raise_for_status()
 
-                # Validate the response structure, not just JSON syntax.
-                payload = response.json()
-
-                if not isinstance(payload, dict):
-                    raise ValueError("Semantic response must be a JSON object.")
-
-                results = payload.get("results")
-                count = payload.get("count")
-
-                if (
-                    payload.get("method") != "embedding"
-                    or not isinstance(results, list)
-                    or not isinstance(count, int)
-                    or isinstance(count, bool)
-                    or count != len(results)
-                ):
-                    raise ValueError(
-                        "Unexpected semantic search response structure."
-                    )
-
+                # Validate JSON syntax and the expected API response shape.
+                validate_semantic_response(response.json())
                 latencies.append(elapsed_ms)
 
             except (httpx.HTTPError, ValueError) as exc:
