@@ -1,5 +1,7 @@
 # TicketWise — Semantic Search and Model Serving Optimization
 
+[![TicketWise CI](https://github.com/Shivanim042003/TicketWise/actions/workflows/ci.yml/badge.svg)](https://github.com/Shivanim042003/TicketWise/actions/workflows/ci.yml)
+
 TicketWise is a semantic-search API for support tickets, focused on efficient model serving, dynamic batching, inference-backend comparison, and retrieval-quality evaluation.
 
 The project explores three main questions:
