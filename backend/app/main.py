@@ -35,8 +35,8 @@ async def lifespan(app: FastAPI):
 
     batcher = DynamicBatcher(
         batch_fn=process_batch,
-        max_batch_size=8,
-        max_wait_ms=5,
+        max_batch_size=int(os.environ.get("TICKETWISE_MAX_BATCH_SIZE", "8")),
+        max_wait_ms=float(os.environ.get("TICKETWISE_MAX_WAIT_MS", "5")),
     )
 
     app.state.semantic_batcher = batcher
