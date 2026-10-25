@@ -1,0 +1,18 @@
+{"status":"healthy","model_backend":"onnx"}
+/home/shiva/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 4 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+endpoint                         users      rps (range)    p95    p99
+_search_semantic                    16   601.8 [578-618]     49     55
+_search_semantic                    24   659.4 [619-675]     61     71
+_search_semantic                    32   745.8 [661-761]     61     69
+_search_semantic                    48   810.0 [803-814]     85    100
+_search_semantic                    64   823.3 [809-830]    120    140
+_search_semantic                    96   852.0 [824-861]    170    190
+_search_semantic                   128   856.1 [838-866]    210    240
+_search_semantic_unbatched          16   519.0 [517-526]     53     66
+_search_semantic_unbatched          24   521.7 [509-528]     78     95
+_search_semantic_unbatched          32   524.7 [518-526]    110    130
+_search_semantic_unbatched          48   535.6 [533-553]    140    170
+_search_semantic_unbatched          64   539.1 [537-556]    200    250
+_search_semantic_unbatched          96   546.0 [541-557]    280    360
+_search_semantic_unbatched         128   540.9 [529-552]    380    540
