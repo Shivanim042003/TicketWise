@@ -53,6 +53,12 @@ These results compare `/search/semantic` with `/search/semantic/unbatched`. Each
 
 Latency values are arithmetic means of the trial-level p95 percentiles, not percentiles calculated from pooled individual requests.
 
+> **Superseded.** This preliminary table used a single-process `httpx` client and compared against a
+> naive single-process unbatched server (1 worker x 4 torch threads). The client capped throughput, and the
+> baseline was not scaled out. Current results use a Locust load generator and a scaled-out unbatched
+> baseline (4 workers x 1 thread): batching gives about 1.7x capacity at p99 <= 200 ms and 2-2.5x at
+> saturation. See [docs/serving-benchmarks.md](docs/serving-benchmarks.md).
+
 ### Methodology
 
 - 200 measured requests per endpoint per trial.
@@ -285,7 +291,7 @@ These historical measurements are separate from the repeated benchmark runs in t
 - Performance depends on hardware, operating system, server load, model, batching configuration, and query workload.
 - Production adoption requires additional testing of repeatability, retrieval quality, threshold calibration, and deployment requirements.
 
-ONNX Runtime is the leading candidate based on the current local measurements, while semantic-only retrieval remains the production ranking method pending stronger validation.
+ONNX Runtime is the next serving experiment and has not yet been load-tested. Semantic-only retrieval remains the production ranking method pending stronger validation.
 
 ## Serving performance
 Dynamic batching on a 4-core CPU budget gives about 1.5-2.5x the throughput of a well-configured
