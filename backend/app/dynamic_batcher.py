@@ -109,20 +109,24 @@ class DynamicBatcher:
             )
 
             while len(batch) < self.max_batch_size:
-                remaining = (
-                    deadline - asyncio.get_running_loop().time()
-                )
-
-                if remaining <= 0:
-                    break
-
+                # Take anything already queued without waiting, so that
+                # max_wait_ms=0 still batches requests that arrived while
+                # the previous batch was being processed.
                 try:
-                    entry = await asyncio.wait_for(
-                        self._queue.get(),
-                        timeout=remaining,
-                    )
-                except asyncio.TimeoutError:
-                    break
+                    entry = self._queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    remaining = deadline - asyncio.get_running_loop().time()
+
+                    if remaining <= 0:
+                        break
+
+                    try:
+                        entry = await asyncio.wait_for(
+                            self._queue.get(),
+                            timeout=remaining,
+                        )
+                    except asyncio.TimeoutError:
+                        break
 
                 if entry is _STOP:
                     # Preserve the stop signal for the next worker iteration.

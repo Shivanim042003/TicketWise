@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 import pytest
 
@@ -220,3 +221,61 @@ def test_batcher_processes_all_concurrent_requests_before_close():
         assert all(len(batch) <= 3 for batch in calls)
 
     asyncio.run(scenario())
+
+
+def test_zero_wait_still_batches_requests_queued_during_inference():
+    calls = []
+
+    def batch_fn(items):
+        calls.append(list(items))
+        time.sleep(0.05)  # keep the worker busy so later requests queue up
+        return list(items)
+
+    async def scenario():
+        batcher = DynamicBatcher(batch_fn, max_batch_size=8, max_wait_ms=0)
+
+        try:
+            first = asyncio.create_task(batcher.submit("first"))
+            await asyncio.sleep(0.02)  # worker is now inside batch_fn
+            rest = [
+                asyncio.create_task(batcher.submit(f"q{i}"))
+                for i in range(5)
+            ]
+            await asyncio.gather(first, *rest)
+        finally:
+            await batcher.close()
+
+    asyncio.run(scenario())
+
+    assert calls[0] == ["first"]
+    assert sorted(calls[1]) == [f"q{i}" for i in range(5)]
+    assert len(calls) == 2
+
+
+def test_zero_wait_still_batches_requests_queued_during_inference():
+    calls = []
+
+    def batch_fn(items):
+        calls.append(list(items))
+        time.sleep(0.05)  # keep the worker busy so later requests queue up
+        return list(items)
+
+    async def scenario():
+        batcher = DynamicBatcher(batch_fn, max_batch_size=8, max_wait_ms=0)
+
+        try:
+            first = asyncio.create_task(batcher.submit("first"))
+            await asyncio.sleep(0.02)  # worker is now inside batch_fn
+            rest = [
+                asyncio.create_task(batcher.submit(f"q{i}"))
+                for i in range(5)
+            ]
+            await asyncio.gather(first, *rest)
+        finally:
+            await batcher.close()
+
+    asyncio.run(scenario())
+
+    assert calls[0] == ["first"]
+    assert sorted(calls[1]) == [f"q{i}" for i in range(5)]
+    assert len(calls) == 2
