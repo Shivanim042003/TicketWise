@@ -302,3 +302,9 @@ unbatched scale-out baseline and about 7-8x a naive single-process server, at p9
 ONNX Runtime (CPU, fp32) is about 2.2x faster than PyTorch without batching and about 1.2x faster with
 batching (same-session, 64 users). ONNX with dynamic batching is the best configuration measured, at
 roughly 3x a scaled-out unbatched PyTorch server. Details: [docs/serving-benchmarks.md](docs/serving-benchmarks.md).
+
+## Docker
+`Dockerfile`, `compose.yaml` and `.dockerignore` describe a CPU-only container (4 uvicorn workers x 1 thread,
+batch cap 32, wait 0, PyTorch by default; set `TICKETWISE_MODEL_BACKEND=onnx` for ONNX Runtime). They have
+**not been built or run yet**: all benchmark results in this repository were measured with uvicorn directly
+under WSL2, not in a container.

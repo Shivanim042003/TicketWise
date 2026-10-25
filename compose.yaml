@@ -1,0 +1,32 @@
+services:
+  api:
+    build: .
+    image: ticketwise-api:local
+    ports:
+      - "${TICKETWISE_PORT:-8000}:8000"
+    environment:
+      TICKETWISE_MODEL_BACKEND: "${TICKETWISE_MODEL_BACKEND:-pytorch}"
+      TICKETWISE_MIN_SIMILARITY: "${TICKETWISE_MIN_SIMILARITY:-0.4396}"
+      TICKETWISE_MAX_BATCH_SIZE: "${TICKETWISE_MAX_BATCH_SIZE:-32}"
+      TICKETWISE_MAX_WAIT_MS: "${TICKETWISE_MAX_WAIT_MS:-0}"
+      TICKETWISE_ONNX_THREADS: "${TICKETWISE_ONNX_THREADS:-1}"
+      WEB_CONCURRENCY: "${WEB_CONCURRENCY:-4}"
+      OMP_NUM_THREADS: "${OMP_NUM_THREADS:-1}"
+      MKL_NUM_THREADS: "${MKL_NUM_THREADS:-1}"
+      HF_HOME: /home/ticketwise/.cache/huggingface
+    volumes:
+      - huggingface_cache:/home/ticketwise/.cache/huggingface
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 240s
+
+volumes:
+  huggingface_cache:
