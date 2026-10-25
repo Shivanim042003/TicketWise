@@ -1,0 +1,4 @@
+endpoint,requests,concurrency,duration_s,successful_requests,errors,error_rate_pct,throughput_rps,p50_ms,p95_ms,p99_ms,mean_ms
+/search,1000,10,1.8829,1000,0,0.0,531.1,14.32,43.94,69.85,18.17
+/search/semantic,1000,10,4.6288,1000,0,0.0,216.04,44.38,51.5,68.48,45.18
+/search/semantic/unbatched,1000,10,15.0099,1000,0,0.0,66.62,149.18,180.66,200.46,149.87

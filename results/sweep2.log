@@ -1,0 +1,28 @@
+=== max_batch_size=8 max_wait_ms=0 ===
+c=1   /search                      n=3  rps  387.41 [323.70-476.61]  p95    4.7  p99    5.7 ms
+c=1   /search/semantic             n=3  rps   46.93 [38.24-49.61]  p95   31.4  p99   36.0 ms
+c=1   /search/semantic/unbatched   n=3  rps   47.38 [34.00-59.59]  p95   27.8  p99   31.1 ms
+c=5   /search                      n=3  rps  516.62 [449.73-762.88]  p95   16.2  p99   25.8 ms
+c=5   /search/semantic             n=3  rps  101.80 [100.05-118.11]  p95   67.5  p99   78.2 ms
+c=5   /search/semantic/unbatched   n=3  rps   84.85 [84.43-90.98]  p95   78.4  p99  100.3 ms
+c=10  /search                      n=3  rps  484.30 [374.20-575.82]  p95   44.7  p99   66.3 ms
+c=10  /search/semantic             n=3  rps  171.78 [169.74-173.97]  p95   73.4  p99   86.7 ms
+c=10  /search/semantic/unbatched   n=3  rps   77.94 [74.64-78.81]  p95  166.3  p99  190.6 ms
+c=20  /search                      n=3  rps  254.99 [240.85-320.52]  p95  183.8  p99  276.6 ms
+c=20  /search/semantic             n=3  rps  222.29 [222.12-230.60]  p95  115.3  p99  136.7 ms
+c=20  /search/semantic/unbatched   n=3  rps   53.77 [53.75-54.90]  p95  450.7  p99  490.6 ms
+{"total_batches":5218,"total_requests_processed":12036,"average_batch_size":2.31,"max_observed_batch_size":8}
+=== max_batch_size=8 max_wait_ms=2 ===
+c=1   /search                      n=3  rps  447.31 [314.88-458.99]  p95    3.5  p99    5.5 ms
+c=1   /search/semantic             n=3  rps   36.54 [33.17-39.76]  p95   37.3  p99   42.0 ms
+c=1   /search/semantic/unbatched   n=3  rps   47.21 [40.58-52.74]  p95   30.9  p99   39.3 ms
+c=5   /search                      n=3  rps  760.21 [518.52-829.47]  p95   10.5  p99   13.3 ms
+c=5   /search/semantic             n=3  rps   96.96 [95.53-106.11]  p95   66.0  p99   77.8 ms
+c=5   /search/semantic/unbatched   n=3  rps   94.41 [93.78-96.98]  p95   64.7  p99   91.5 ms
+c=10  /search                      n=3  rps  554.44 [360.98-569.21]  p95   35.0  p99   50.5 ms
+c=10  /search/semantic             n=3  rps  158.79 [143.49-166.81]  p95   94.1  p99  110.0 ms
+c=10  /search/semantic/unbatched   n=3  rps   85.77 [81.36-87.82]  p95  137.9  p99  148.4 ms
+c=20  /search                      n=3  rps  492.84 [473.76-498.58]  p95   94.5  p99  139.7 ms
+c=20  /search/semantic             n=3  rps  227.76 [197.46-246.64]  p95  121.7  p99  131.8 ms
+c=20  /search/semantic/unbatched   n=3  rps   78.86 [74.47-79.26]  p95  297.3  p99  318.0 ms
+{"total_batches":5211,"total_requests_processed":12036,"average_batch_size":2.31,"max_observed_batch_size":8}

@@ -12,6 +12,22 @@ The project explores three main questions:
 
 All benchmark numbers below are local experimental measurements, not production performance guarantees.
 
+## Quick start
+
+### Local setup
+
+Use Python 3.12. From the repository root, create and activate a virtual environment, install dependencies, and run tests:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+python -m pytest
+```
+
+If your existing virtual environment has no pip, repair or recreate it before installing dependencies.
+
 ## 1. Architecture
 
 - **API framework:** FastAPI
@@ -246,7 +262,7 @@ Run the automated test suite:
 python -m pytest
 ```
 
-The latest recorded run passed all 26 tests across the API, dynamic batcher, and semantic-search test modules. A Starlette deprecation warning was emitted by the test-client integration; it did not cause test failures.
+The latest recorded local run passed all 34 tests across the API, benchmark response-validation, dynamic batcher, and semantic-search modules. GitHub Actions checks syntax and runs the test suite on pushes to main and pull requests.
 
 ## 8. Historical Benchmark Summary
 
@@ -270,3 +286,8 @@ These historical measurements are separate from the repeated benchmark runs in t
 - Production adoption requires additional testing of repeatability, retrieval quality, threshold calibration, and deployment requirements.
 
 ONNX Runtime is the leading candidate based on the current local measurements, while semantic-only retrieval remains the production ranking method pending stronger validation.
+
+## Serving performance
+Dynamic batching on a 4-core CPU budget gives about 1.5-2.5x the throughput of a well-configured
+unbatched scale-out baseline and about 7-8x a naive single-process server, at p99 <= 200 ms
+(about 400 vs 240 vs 60 req/s). Full method, tables and limitations: [docs/serving-benchmarks.md](docs/serving-benchmarks.md).
