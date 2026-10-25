@@ -2,10 +2,14 @@
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from backend.app.dynamic_batcher import BatchRequest, DynamicBatcher
+from backend.app.dynamic_batcher import (
+    BatchRequest,
+    DynamicBatcher,
+    QueueFullError,
+)
 from backend.app.search import search_tickets
 from backend.app.semantic_search import SemanticSearch
 
@@ -35,8 +39,10 @@ async def lifespan(app: FastAPI):
 
     batcher = DynamicBatcher(
         batch_fn=process_batch,
-        max_batch_size=int(os.environ.get("TICKETWISE_MAX_BATCH_SIZE", "8")),
-        max_wait_ms=float(os.environ.get("TICKETWISE_MAX_WAIT_MS", "5")),
+        max_batch_size=int(os.environ.get("TICKETWISE_MAX_BATCH_SIZE", "32")),
+        max_wait_ms=float(os.environ.get("TICKETWISE_MAX_WAIT_MS", "0")),
+        max_queue_size=int(os.environ.get("TICKETWISE_MAX_QUEUE_SIZE", "256")),
+        reject_when_full=True,
     )
 
     app.state.semantic_batcher = batcher
@@ -85,6 +91,7 @@ def health_check(request: Request):
     return {
         "status": "healthy",
         "model_backend": search_engine.backend,
+        "batching": request.app.state.semantic_batcher.config,
     }
 
 
@@ -114,12 +121,19 @@ async def semantic_search(
         http_request.app.state.semantic_batcher
     )
 
-    results = await batcher.submit(
-        BatchRequest(
-            query=request.query,
-            top_k=request.top_k,
+    try:
+        results = await batcher.submit(
+            BatchRequest(
+                query=request.query,
+                top_k=request.top_k,
+            )
         )
-    )
+    except QueueFullError:
+        raise HTTPException(
+            status_code=503,
+            detail="Server is overloaded; retry shortly",
+            headers={"Retry-After": "1"},
+        ) from None
     results = apply_similarity_threshold(results)
 
     return {
@@ -158,4 +172,7 @@ def semantic_search_unbatched(
 def batching_metrics(request: Request):
     """Return runtime dynamic-batching metrics."""
     batcher: DynamicBatcher = request.app.state.semantic_batcher
-    return batcher.metrics
+    return {
+        **batcher.metrics,
+        "rejected_requests": batcher.rejected_requests,
+    }

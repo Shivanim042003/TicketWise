@@ -8,6 +8,10 @@ T = TypeVar("T")
 _STOP = object()
 
 
+class QueueFullError(RuntimeError):
+    """Raised when the queue is full and the batcher is set to reject."""
+
+
 @dataclass(frozen=True)
 class BatchRequest:
     """A semantic-search request with its own result limit."""
@@ -25,6 +29,7 @@ class DynamicBatcher:
         max_batch_size: int = 8,
         max_wait_ms: float = 5.0,
         max_queue_size: int = 256,
+        reject_when_full: bool = False,
     ):
         if max_batch_size < 1:
             raise ValueError("max_batch_size must be at least 1")
@@ -38,6 +43,10 @@ class DynamicBatcher:
         self.batch_fn = batch_fn
         self.max_batch_size = max_batch_size
         self.max_wait_seconds = max_wait_ms / 1000
+        self.max_wait_ms = max_wait_ms
+        self.max_queue_size = max_queue_size
+        self.reject_when_full = reject_when_full
+        self.rejected_requests = 0
 
         self._queue = asyncio.Queue(maxsize=max_queue_size)
         self._worker_task: asyncio.Task | None = None
@@ -66,6 +75,15 @@ class DynamicBatcher:
             "max_observed_batch_size": self.max_observed_batch_size,
         }
 
+    @property
+    def config(self) -> dict:
+        """Return the batching configuration."""
+        return {
+            "max_batch_size": self.max_batch_size,
+            "max_wait_ms": self.max_wait_ms,
+            "max_queue_size": self.max_queue_size,
+        }
+
     async def start(self) -> None:
         """Start the background worker once."""
         async with self._state_lock:
@@ -85,7 +103,15 @@ class DynamicBatcher:
                 self._worker_task = asyncio.create_task(self._worker())
 
             future = asyncio.get_running_loop().create_future()
-            await self._queue.put((item, future))
+
+            if self.reject_when_full:
+                try:
+                    self._queue.put_nowait((item, future))
+                except asyncio.QueueFull:
+                    self.rejected_requests += 1
+                    raise QueueFullError("Batcher queue is full") from None
+            else:
+                await self._queue.put((item, future))
 
         try:
             return await future
