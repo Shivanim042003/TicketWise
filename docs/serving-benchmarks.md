@@ -55,7 +55,7 @@ throughput of one four-thread process before any batching.
   (batched 4x1 at 64 users: 631 rps in one run, 494 rps in the headline run). Compare ratios, not rps.
 - 30 s windows, 3 repetitions; some ranges overlap (for example batched at 32 users: 252-398 rps).
 - Closed-loop load, not a fixed arrival rate; tail latency under open-loop load may differ.
-- 25 short evaluation queries; PyTorch CPU only. ONNX Runtime and Triton are not yet measured.
+- 25 short evaluation queries; CPU only. Triton is not yet measured.
 - No cloud cost model yet.
 
 ## Reproduce
@@ -64,3 +64,38 @@ bash scripts/headline.sh                    # 4 workers x 1 thread, 3 repetition
 bash scripts/baseline_sweep.sh              # worker/thread layouts
 bash scripts/locust_run.sh OUTDIR TAG "/search/semantic /search/semantic/unbatched" "16 32 64" 30
 ```
+
+## ONNX Runtime (C3 unbatched, C4 batched)
+
+Same harness and layout: ONNX Runtime CPU provider, `onnx/model.onnx` (fp32, pinned explicitly), one
+intra-op thread per worker, 4 workers, batch cap 32, wait 0. Embeddings match PyTorch (minimum cosine
+1.0, maximum absolute difference 1.3e-7 on 6 queries). Medians of 3 repetitions, 30 s each:
+
+| Users | Batched rps (range) | Batched p99 | Unbatched rps (range) | Unbatched p99 | Batching gain |
+|---:|---|---:|---|---:|---:|
+| 16  | 602 [578-618] | 55 ms  | 519 [517-526] | 66 ms  | 1.16x |
+| 24  | 659 [619-675] | 71 ms  | 522 [509-528] | 95 ms  | 1.26x |
+| 32  | 746 [661-761] | 69 ms  | 525 [518-526] | 130 ms | 1.42x |
+| 48  | 810 [803-814] | 100 ms | 536 [533-553] | 170 ms | 1.51x |
+| 64  | 823 [809-830] | 140 ms | 539 [537-556] | 250 ms | 1.53x |
+| 96  | 852 [824-861] | 190 ms | 546 [541-557] | 360 ms | 1.56x |
+| 128 | 856 [838-866] | 240 ms | 541 [529-552] | 540 ms | 1.58x |
+
+At p99 <= 200 ms, ONNX batched holds up to 96 users (about 850 rps) and ONNX unbatched up to 48 users
+(about 535 rps).
+
+### PyTorch vs ONNX, same session (64 users)
+
+Separate headline runs were about an hour apart and the machine drifted (PyTorch batched at 64 users:
+494 rps in the PyTorch headline, 606 rps here). The cross-backend comparison therefore comes from an
+interleaved run: 3 rounds, backend order alternated each round, server restarted per backend.
+
+| Endpoint | PyTorch rps (range) | ONNX rps (range) | ONNX / PyTorch |
+|---|---|---|---:|
+| Batched   | 606 [577-630], p99 200 ms | 723 [668-743], p99 200 ms | 1.19x |
+| Unbatched | 237 [233-258], p99 620 ms | 520 [484-535], p99 260 ms | 2.19x |
+
+- ONNX unbatched is about 2.2x PyTorch unbatched and reaches about 86% of PyTorch batched.
+- Batching gains 2.6x for PyTorch but 1.4x for ONNX at 64 users: ONNX has less per-request overhead to amortize.
+- ONNX with batching is about 3x PyTorch scaled-out unbatched (723 vs 237 rps).
+- Use ratios, not absolute rps: absolute throughput drifts 10-25% between sessions.

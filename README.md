@@ -297,3 +297,8 @@ ONNX Runtime is the next serving experiment and has not yet been load-tested. Se
 Dynamic batching on a 4-core CPU budget gives about 1.5-2.5x the throughput of a well-configured
 unbatched scale-out baseline and about 7-8x a naive single-process server, at p99 <= 200 ms
 (about 400 vs 240 vs 60 req/s). Full method, tables and limitations: [docs/serving-benchmarks.md](docs/serving-benchmarks.md).
+
+
+ONNX Runtime (CPU, fp32) is about 2.2x faster than PyTorch without batching and about 1.2x faster with
+batching (same-session, 64 users). ONNX with dynamic batching is the best configuration measured, at
+roughly 3x a scaled-out unbatched PyTorch server. Details: [docs/serving-benchmarks.md](docs/serving-benchmarks.md).
