@@ -308,3 +308,9 @@ roughly 3x a scaled-out unbatched PyTorch server. Details: [docs/serving-benchma
 batch cap 32, wait 0, PyTorch by default; set `TICKETWISE_MODEL_BACKEND=onnx` for ONNX Runtime). They have
 **not been built or run yet**: all benchmark results in this repository were measured with uvicorn directly
 under WSL2, not in a container.
+
+## Docker
+`Dockerfile`, `compose.yaml` and `.dockerignore` describe a CPU-only container (4 uvicorn workers x 1 thread,
+batch cap 32, wait 0, PyTorch by default; set `TICKETWISE_MODEL_BACKEND=onnx` for ONNX Runtime). They have
+**not been built or run yet**: all benchmark results in this repository were measured with uvicorn directly
+under WSL2, not in a container.
