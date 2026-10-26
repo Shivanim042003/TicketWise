@@ -359,3 +359,9 @@ a container.
 - Public benchmark (BEIR SciFact, 5,183 docs, 300 queries): `docs/retrieval-public-benchmark.md`.
   bge-small scored nDCG@10 0.703 vs MiniLM 0.648 and BM25 0.664. The serving cost of
   switching models has not been measured.
+
+## Retrieval evaluation summary
+- Held-out split on the project's own tickets (BM25 vs MiniLM vs bge-small): `docs/retrieval-evaluation.md`.
+- Public benchmark (BEIR SciFact, 5,183 docs, 300 queries): `docs/retrieval-public-benchmark.md`.
+  bge-small scored nDCG@10 0.703 vs MiniLM 0.648 and BM25 0.664. The serving cost of
+  switching models has not been measured.
