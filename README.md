@@ -12,6 +12,31 @@ The project explores three main questions:
 
 All benchmark numbers below are local experimental measurements, not production performance guarantees.
 
+## Results at a glance
+
+Semantic search with `all-MiniLM-L6-v2` on CPU, server limited to 4 logical CPUs (Intel Core Ultra 9 288V laptop,
+WSL2), closed-loop Locust load, p99 latency target of 200 ms. Capacity is the highest measured throughput that
+still met the target.
+
+| Setup | Requests/s at p99 <= 200 ms | Cost per 1M searches (c7i.xlarge, 60% utilization) |
+|---|---:|---:|
+| PyTorch, 1 process x 4 threads, unbatched | 62 | $1.34 |
+| PyTorch, 4 workers x 1 thread, unbatched | 240 | $0.34 |
+| PyTorch, 4 workers x 1 thread, dynamic batching | 406 | $0.20 |
+| ONNX Runtime, 4 workers x 1 thread, unbatched | 536 | $0.15 |
+| **ONNX Runtime, 4 workers x 1 thread, dynamic batching** | **852** | **$0.10** |
+
+- **Scale out before batching.** Four one-thread workers give about 4x the throughput of one four-thread process.
+- **Dynamic batching adds about 1.6-1.7x capacity** at the latency target on top of a well-configured baseline.
+- **ONNX Runtime is about 2.2x faster than PyTorch without batching and about 1.2x with batching**
+  (same-session test, 64 users).
+- Caveats: one machine, absolute throughput drifts 10-25% between sessions (the PyTorch rows ran in a slower
+  state, so they are roughly 20% pessimistic), and the costs are laptop-derived estimates, not EC2 measurements.
+  Ratios are more reliable than absolute values.
+
+Details: [docs/serving-benchmarks.md](docs/serving-benchmarks.md) (method, tables, limitations) and
+[docs/cost-model.md](docs/cost-model.md) (cost model).
+
 ## Quick start
 
 ### Local setup
@@ -112,6 +137,11 @@ TicketWise supports PyTorch CPU and ONNX Runtime CPU inference. The following re
 Throughput improvement is relative to PyTorch median throughput. Positive p95 reduction indicates lower ONNX p95 latency.
 
 All measured requests succeeded in the reported trials. These results are local experiments; repeatability and performance on other workloads or hardware have not been established.
+
+> **Superseded.** These measurements used a single-process `httpx` load generator and a naive single-process
+> server. For the current comparison (Locust, scaled-out workers, dynamic batching, same-session test) see the
+> ONNX Runtime section of [docs/serving-benchmarks.md](docs/serving-benchmarks.md): ONNX is about 2.2x faster
+> than PyTorch unbatched and about 1.2x with dynamic batching.
 
 ### Configure the inference backend
 
@@ -291,23 +321,22 @@ These historical measurements are separate from the repeated benchmark runs in t
 - Performance depends on hardware, operating system, server load, model, batching configuration, and query workload.
 - Production adoption requires additional testing of repeatability, retrieval quality, threshold calibration, and deployment requirements.
 
-ONNX Runtime is the next serving experiment and has not yet been load-tested. Semantic-only retrieval remains the production ranking method pending stronger validation.
+- Serving results come from one laptop (WSL2, hybrid-core CPU). Absolute throughput drifts 10-25% between sessions,
+  so ratios are more reliable than absolute numbers, and the cloud costs are laptop-derived estimates.
+- Load tests are closed-loop, CPU only, with 25 short queries. Open-loop arrival rates, longer inputs, GPUs and
+  Triton Inference Server were not tested.
+- The Docker image has not been built or run (see Docker below).
+
+Semantic-only retrieval remains the production ranking method pending stronger validation.
 
 ## Serving performance
 Dynamic batching on a 4-core CPU budget gives about 1.5-2.5x the throughput of a well-configured
 unbatched scale-out baseline and about 7-8x a naive single-process server, at p99 <= 200 ms
 (about 400 vs 240 vs 60 req/s). Full method, tables and limitations: [docs/serving-benchmarks.md](docs/serving-benchmarks.md).
 
-
 ONNX Runtime (CPU, fp32) is about 2.2x faster than PyTorch without batching and about 1.2x faster with
 batching (same-session, 64 users). ONNX with dynamic batching is the best configuration measured, at
 roughly 3x a scaled-out unbatched PyTorch server. Details: [docs/serving-benchmarks.md](docs/serving-benchmarks.md).
-
-## Docker
-`Dockerfile`, `compose.yaml` and `.dockerignore` describe a CPU-only container (4 uvicorn workers x 1 thread,
-batch cap 32, wait 0, PyTorch by default; set `TICKETWISE_MODEL_BACKEND=onnx` for ONNX Runtime). They have
-**not been built or run yet**: all benchmark results in this repository were measured with uvicorn directly
-under WSL2, not in a container.
 
 ## Docker
 `Dockerfile`, `compose.yaml` and `.dockerignore` describe a CPU-only container (4 uvicorn workers x 1 thread,
