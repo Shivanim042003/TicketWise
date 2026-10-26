@@ -30,6 +30,8 @@ still met the target.
 - **Dynamic batching adds about 1.6-1.7x capacity** at the latency target on top of a well-configured baseline.
 - **ONNX Runtime is about 2.2x faster than PyTorch without batching and about 1.2x with batching**
   (same-session test, 64 users).
+- **Triton Inference Server (CPU, separate container) reached about 70% of in-process ONNX serving** on the same 4 CPUs
+  (453 vs 627 req/s with batching at 64 users): the extra network hop costs more than Triton's batching saves here.
 - Caveats: one machine, absolute throughput drifts 10-25% between sessions (the PyTorch rows ran in a slower
   state, so they are roughly 20% pessimistic), and the costs are laptop-derived estimates, not EC2 measurements.
   Ratios are more reliable than absolute values.
@@ -323,8 +325,8 @@ These historical measurements are separate from the repeated benchmark runs in t
 
 - Serving results come from one laptop (WSL2, hybrid-core CPU). Absolute throughput drifts 10-25% between sessions,
   so ratios are more reliable than absolute numbers, and the cloud costs are laptop-derived estimates.
-- Load tests are closed-loop, CPU only, with 25 short queries. Open-loop arrival rates, longer inputs, GPUs and
-  Triton Inference Server were not tested.
+- Load tests are closed-loop, CPU only, with 25 short queries. Open-loop arrival rates, longer inputs and GPUs
+  were not tested. Triton was measured at a single load level (64 users) and not tuned.
 - The Docker image was smoke-tested but never load-tested; all benchmarks ran outside a container (see Docker below).
 
 Semantic-only retrieval remains the production ranking method pending stronger validation.

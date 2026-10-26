@@ -8,3 +8,7 @@ data/profiling/
 data/benchmark_results.csv
 data/dynamic_batching_*.jsonl
 data/dynamic_batching_summary.json
+
+# Triton build artifacts (regenerate with scripts/prepare_triton_models.py)
+triton_repo/build/
+triton_repo/model_repository/*/1/model.onnx

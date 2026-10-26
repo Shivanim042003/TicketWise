@@ -1,0 +1,10 @@
+round 1: tbatch
+/home/shiva/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 4 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+round 1: tnobatch
+/home/shiva/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 4 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+C4  ONNX + in-process batching   no data
+C3  ONNX, no batching            no data
+C5  Triton, dynamic batching      452.7 [453-453]  p95  260  p99  330  failures 0
+C5a Triton, no batching           347.0 [347-347]  p95  210  p99  220  failures 0

@@ -1,0 +1,14 @@
+name: "minilm_nobatch"
+backend: "onnxruntime"
+max_batch_size: 32
+input [
+  { name: "input_ids" data_type: TYPE_INT64 dims: [ 16 ] },
+  { name: "attention_mask" data_type: TYPE_INT64 dims: [ 16 ] },
+  { name: "token_type_ids" data_type: TYPE_INT64 dims: [ 16 ] }
+]
+output [
+  { name: "sentence_embedding" data_type: TYPE_FP32 dims: [ 384 ] }
+]
+instance_group [ { count: 4 kind: KIND_CPU } ]
+parameters { key: "intra_op_thread_count" value: { string_value: "1" } }
+parameters { key: "inter_op_thread_count" value: { string_value: "1" } }
