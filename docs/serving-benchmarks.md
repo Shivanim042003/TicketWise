@@ -96,7 +96,7 @@ interleaved run: 3 rounds, backend order alternated each round, server restarted
 | Unbatched | 237 [233-258], p99 620 ms | 520 [484-535], p99 260 ms | 2.19x |
 
 - ONNX unbatched is about 2.2x PyTorch unbatched and reaches about 86% of PyTorch batched.
-- Batching gains 2.6x for PyTorch but 1.4x for ONNX at 64 users: ONNX has less per-request overhead to amortize.
+- Batching gains 2.6x for PyTorch but 1.4x for ONNX at 64 users: a plausible explanation is that ONNX has less per-request overhead to amortize (not profiled).
 - ONNX with batching is about 3x PyTorch scaled-out unbatched (723 vs 237 rps).
 - Use ratios, not absolute rps: absolute throughput drifts 10-25% between sessions.
 
