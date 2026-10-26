@@ -55,7 +55,7 @@ throughput of one four-thread process before any batching.
   (batched 4x1 at 64 users: 631 rps in one run, 494 rps in the headline run). Compare ratios, not rps.
 - 30 s windows, 3 repetitions; some ranges overlap (for example batched at 32 users: 252-398 rps).
 - Closed-loop load, not a fixed arrival rate; tail latency under open-loop load may differ.
-- 25 short evaluation queries; CPU only. Triton is not yet measured.
+- 25 short evaluation queries; CPU only. Triton was measured at one load level and not tuned (see below).
 - No cloud cost model yet.
 
 ## Reproduce
@@ -99,3 +99,40 @@ interleaved run: 3 rounds, backend order alternated each round, server restarted
 - Batching gains 2.6x for PyTorch but 1.4x for ONNX at 64 users: ONNX has less per-request overhead to amortize.
 - ONNX with batching is about 3x PyTorch scaled-out unbatched (723 vs 237 rps).
 - Use ratios, not absolute rps: absolute throughput drifts 10-25% between sessions.
+
+## Triton Inference Server (C5a, C5)
+
+Setup: NVIDIA Triton 26.09 (CPU only, no `--gpus`) in Docker, pinned to CPUs 0-3 with `--cpuset-cpus`, ONNX Runtime
+backend, 4 CPU instances with 1 intra-op thread each. The model is the same ONNX MiniLM with mean pooling and L2
+normalization fused into the graph (checked against PyTorch: cosine 1.0, identical top-1 on 6 queries). The FastAPI
+app (4 workers x 1 thread, same CPUs) tokenizes, sends each query to Triton over HTTP/JSON, and runs the ticket
+search. C5a has no batching in Triton; C5 uses Triton dynamic batching (max batch 32, queue delay 0). Queries are
+padded to a fixed 16 tokens (the longest evaluation query is 12 tokens): Triton can only batch requests of
+identical shape.
+
+Same-session comparison, 64 users, 3 rounds with the order rotated each round (medians, ranges in brackets):
+
+| Config | Requests/s | p95 | p99 |
+|---|---:|---:|---:|
+| C4 ONNX + in-process batching | 627 [578-694] | 190 ms | 210 ms |
+| C3 ONNX, no batching | 489 [473-560] | 210 ms | 270 ms |
+| C5 Triton, dynamic batching | 453 [393-470] | 260 ms | 340 ms |
+| C5a Triton, no batching | 327 [316-350] | 210 ms | 250 ms |
+
+- On 4 CPUs, Triton reached about 70% of in-process ONNX: 0.67x unbatched (327 vs 489) and 0.72x batched (453 vs 627).
+  The cost is the extra network hop and JSON encoding, and the app and Triton sharing the same 4 CPUs.
+- Triton's dynamic batching works: 1.39x over Triton unbatched, against 1.28x for in-process batching.
+- Padding matters. The first attempt padded to 64 tokens (queries are about 9 tokens) and gave only 118 req/s
+  (C5) and 134 req/s (C5a); there Triton batching made things worse. Raw results: `results/triton_interleaved`.
+- No configuration met p99 <= 200 ms at 64 users (closest: C4 at 210 ms). Triton's capacity at the target was not
+  measured, so it is not in the cost model.
+- Limits: not tuned (instance count, queue delay, gRPC or binary tensors instead of JSON), Docker Desktop port
+  forwarding adds overhead, one load level. This is a result for this setup, not a verdict on Triton, whose
+  strengths (GPUs, many models, model repository, metrics) a single small CPU model does not exercise.
+
+Reproduce (needs Docker):
+
+```bash
+python scripts/prepare_triton_models.py 16                  # builds triton_repo/model_repository
+bash scripts/interleave_triton.sh results/triton_final      # C3, C4, C5a, C5 interleaved, about 25 min
+```
