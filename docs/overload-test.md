@@ -24,7 +24,7 @@ Server memory (all processes): 2510 MB at start, 2530 MB peak, 2530 MB at end.
 No responses other than 200 and 503.
 
 ## Findings
-- Under 10x overload the service stayed up, kept memory flat, and returned explicit 503s.
+- Under a concurrency spike from 48 to 512 closed-loop clients (about 10x) the service stayed up, kept memory flat, and returned explicit 503s.
   Accepted-request latency was bounded (p99 about 1.5 s) rather than growing without limit.
 - Latency was back to normal in the first 15 s window after the spike.
 - Rejecting is not free: with about 7,300 rejections per second, accepted throughput
@@ -39,3 +39,4 @@ No responses other than 200 and 503.
   phases, probably a cold-start effect, so recovery is judged on latency returning to
   normal, not on matching the first phase.
 - Closed-loop clients without backoff, which is harsher than typical clients.
+- The spike raises client concurrency in a closed loop; it is not a controlled arrival-rate increase, so achieved request rates differ between phases. Accepted-request p99 (about 1.5 s) stayed far above a 200 ms target: the protection preserves availability, not the latency target.
