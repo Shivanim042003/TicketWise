@@ -30,3 +30,4 @@ Script: `python scripts/eval_public.py` (raw output: `results/retrieval_public_s
 - SciFact is scientific claim verification, not support tickets. It tests general
   retrieval quality on a real corpus, not performance on support text.
 - A single dataset, a single run, no confidence intervals.
+- The ranking of models changed between the 25-ticket set and SciFact, but corpus size, domain, query style and labelling all differ, so the change cannot be attributed to corpus size alone.
