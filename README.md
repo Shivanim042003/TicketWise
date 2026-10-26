@@ -347,3 +347,21 @@ batch cap 32, wait 0, PyTorch by default; set `TICKETWISE_MODEL_BACKEND=onnx` fo
 The image builds and starts, and `/health` and `/search/semantic` were smoke-tested with both backends. It has not
 been load-tested: all benchmark results in this repository were measured with uvicorn directly under WSL2, not in
 a container.
+
+## Retrieval evaluation summary
+- Held-out split on the project's own tickets (BM25 vs MiniLM vs bge-small): `docs/retrieval-evaluation.md`.
+- Public benchmark (BEIR SciFact, 5,183 docs, 300 queries): `docs/retrieval-public-benchmark.md`.
+  bge-small scored nDCG@10 0.703 vs MiniLM 0.648 and BM25 0.664. The serving cost of
+  switching models has not been measured.
+
+## Retrieval evaluation summary
+- Held-out split on the project's own tickets (BM25 vs MiniLM vs bge-small): `docs/retrieval-evaluation.md`.
+- Public benchmark (BEIR SciFact, 5,183 docs, 300 queries): `docs/retrieval-public-benchmark.md`.
+  bge-small scored nDCG@10 0.703 vs MiniLM 0.648 and BM25 0.664. The serving cost of
+  switching models has not been measured.
+
+## Retrieval evaluation summary
+- Held-out split on the project's own tickets (BM25 vs MiniLM vs bge-small): `docs/retrieval-evaluation.md`.
+- Public benchmark (BEIR SciFact, 5,183 docs, 300 queries): `docs/retrieval-public-benchmark.md`.
+  bge-small scored nDCG@10 0.703 vs MiniLM 0.648 and BM25 0.664. The serving cost of
+  switching models has not been measured.
