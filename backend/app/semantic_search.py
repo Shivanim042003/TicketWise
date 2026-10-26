@@ -25,10 +25,20 @@ class SemanticSearch:
             )
 
         if self.backend == "onnx":
+            import onnxruntime as ort
+
+            session_options = ort.SessionOptions()
+            threads = int(os.getenv("TICKETWISE_ONNX_THREADS", "0"))
+            if threads > 0:
+                session_options.intra_op_num_threads = threads
             self.model = SentenceTransformer(
                 MODEL_NAME,
                 backend="onnx",
-                model_kwargs={"provider": "CPUExecutionProvider"},
+                model_kwargs={
+                    "provider": "CPUExecutionProvider",
+                    "file_name": os.getenv("TICKETWISE_ONNX_FILE", "onnx/model.onnx"),
+                    "session_options": session_options,
+                },
             )
         else:
             self.model = SentenceTransformer(

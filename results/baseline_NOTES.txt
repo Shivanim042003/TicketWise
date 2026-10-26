@@ -1,0 +1,6 @@
+Original run (16:17-16:50): batched 1 worker x 4 threads, Locust, cap 32, wait 0.
+These CSVs were overwritten by an interrupted duplicate run and removed; values from the original log:
+users=8   rps 217.9  p50 36  p95 49  p99 57
+users=16  rps 261.1  p50 58  p95 110 p99 150
+users=32  rps 380.0  p50 80  p95 110 p99 150
+users=64  rps 468.7  p50 120 p95 180 p99 440
