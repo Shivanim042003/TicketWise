@@ -21,8 +21,8 @@ Script: `python scripts/bench_encoders.py` (raw output: `results/encoder_cost.js
 - It costs about 2.0x the encode compute (12 layers vs 6).
 - On the project's 25-ticket set MiniLM ranked best (`docs/retrieval-evaluation.md`),
   so the in-domain evidence does not favour switching.
-- Upper-bound cost estimate: if serving cost scaled fully with encode time, the ONNX
-  batched cost model figure (about $0.10 per 1M queries) would rise to at most about
+- Rough, unmeasured cost estimate: if serving cost scaled fully with encode time, the ONNX
+  batched cost model figure (about $0.10 per 1M queries) would rise toward about
   $0.20. Fixed per-request overhead does not double, so the real increase would be smaller.
   An end-to-end load test with bge-small has not been run.
 
