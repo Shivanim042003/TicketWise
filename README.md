@@ -325,7 +325,7 @@ These historical measurements are separate from the repeated benchmark runs in t
   so ratios are more reliable than absolute numbers, and the cloud costs are laptop-derived estimates.
 - Load tests are closed-loop, CPU only, with 25 short queries. Open-loop arrival rates, longer inputs, GPUs and
   Triton Inference Server were not tested.
-- The Docker image has not been built or run (see Docker below).
+- The Docker image was smoke-tested but never load-tested; all benchmarks ran outside a container (see Docker below).
 
 Semantic-only retrieval remains the production ranking method pending stronger validation.
 
@@ -340,6 +340,8 @@ roughly 3x a scaled-out unbatched PyTorch server. Details: [docs/serving-benchma
 
 ## Docker
 `Dockerfile`, `compose.yaml` and `.dockerignore` describe a CPU-only container (4 uvicorn workers x 1 thread,
-batch cap 32, wait 0, PyTorch by default; set `TICKETWISE_MODEL_BACKEND=onnx` for ONNX Runtime). They have
-**not been built or run yet**: all benchmark results in this repository were measured with uvicorn directly
-under WSL2, not in a container.
+batch cap 32, wait 0, PyTorch by default; set `TICKETWISE_MODEL_BACKEND=onnx` for ONNX Runtime). Run it with `docker compose up -d`
+(the first start downloads the model into a Docker volume; add `TICKETWISE_MODEL_BACKEND=onnx` for ONNX Runtime).
+The image builds and starts, and `/health` and `/search/semantic` were smoke-tested with both backends. It has not
+been load-tested: all benchmark results in this repository were measured with uvicorn directly under WSL2, not in
+a container.
