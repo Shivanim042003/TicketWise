@@ -28,7 +28,7 @@ No responses other than 200 and 503.
   Accepted-request latency was bounded (p99 about 1.5 s) rather than growing without limit.
 - Latency was back to normal in the first 15 s window after the spike.
 - Rejecting is not free: with about 7,300 rejections per second, accepted throughput
-  fell to about half of normal capacity. These clients retry immediately; clients that
+  was 358 req/s during the spike, below the 485 before and 684-784 after (the 'before' phase may be cold-start-depressed, so the size of the drop depends on the comparator). CPU spent on rejections is a plausible cause, not profiled. These clients retry immediately; clients that
   honour `Retry-After` would produce far fewer rejections.
 - A 64-entry queue allows about 0.7 s of queueing per worker at the overloaded service
   rate, far above a 200 ms target. The queue limit should be derived from the latency
