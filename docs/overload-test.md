@@ -40,3 +40,5 @@ No responses other than 200 and 503.
   normal, not on matching the first phase.
 - Closed-loop clients without backoff, which is harsher than typical clients.
 - The spike raises client concurrency in a closed loop; it is not a controlled arrival-rate increase, so achieved request rates differ between phases. Accepted-request p99 (about 1.5 s) stayed far above a 200 ms target: the protection preserves availability, not the latency target.
+
+See `docs/queue-sweep.md` for queue-size and Retry-After results; the earlier single run above used a queue limit of 64.
